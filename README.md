@@ -8,7 +8,13 @@ My current goal is to build a Twitter ArtBot, which I expect should be done by a
 * **my_broswer_automation** is for more complex tasks, where with a bot is used to communicate with a server; mostly using Selenium. 
 * **my_utility** contains methods for string searching, data formatting, etc.
 * **movie_lists** contains collections of imdb tags, used as a resource for testing.
+* **movie_database** contains classes used to construct a database of movies.
 * **Create Movie Database.sql** defines the data format for the target database.
+
+## Files --- Example Notebooks
+
+* **IMDB Webscraping Example** --- construction of a dataset based on six classic films directed by David Lean.
+* **Recursive Recomendations Example** --- automated IMDB crawling to find recommendations, recommendations-of-recommendations, etc.
 
 # DevLog
 
