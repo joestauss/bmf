@@ -2,6 +2,7 @@ import requests
 import re
 import random
 from bs4 import BeautifulSoup
+import my_utility
 
 class IMDB_Data():
     def __init__(self, imdb_id):
@@ -106,19 +107,19 @@ class IMDB_Data():
 
         details_div = soup.find('div', id='titleDetails')
         try:
-            budget_div  = my_webscraping.search_in_soup( details_div, 'div', 'Budget')
+            budget_div  = search_in_soup( details_div, 'div', 'Budget')
             self.budget = my_utility.find_dollar_amount(budget_div.text)
         except:
             self.budget = None
 
         try:
-            boxOffice_div  = my_webscraping.search_in_soup( details_div, 'div', 'Cumulative Worldwide Gross')
+            boxOffice_div  = search_in_soup( details_div, 'div', 'Cumulative Worldwide Gross')
             self.box_office = my_utility.find_dollar_amount(boxOffice_div.text)
         except:
             self.box_office = None
 
         try:
-            runtime_div = my_webscraping.search_in_soup( details_div, 'div', 'Runtime')
+            runtime_div = search_in_soup( details_div, 'div', 'Runtime')
             self.runtime = my_utility.find_minute_amount( runtime_div.text)
         except:
             self.runtime = None

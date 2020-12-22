@@ -99,14 +99,14 @@ class NormalizedMovieDatabase():
     def as_sql(self):
         load_order = [
             'Movie',
-            'Production',
             'Genre',
+            'MovieGenre',
             'Person',
             'RoleCode',
-            'Tagline',
-            'MovieGenre',
+            'Role',
+            'Production',
             'MovieProduction',
-            'Role'
+            'Tagline'
         ]
 
         all_tables = []
