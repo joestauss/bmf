@@ -8,6 +8,7 @@ My current goal is to build a Twitter ArtBot, which I expect should be done by a
 * **my_broswer_automation** is for more complex tasks, where with a bot is used to communicate with a server; mostly using Selenium. 
 * **my_utility** contains methods for string searching, data formatting, etc.
 * **movie_lists** contains collections of imdb tags, used as a resource for testing.
+* **Create Movie Database.sql** defines the data format for the target database.
 
 # DevLog
 
