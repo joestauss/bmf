@@ -17,6 +17,13 @@ class SoupUtil():
         return None
 
 class SQLUtil():
+    def add_primary_key( primary_key_name, records):
+        counter = 0
+        for record in records:
+            record[ primary_key_name] = counter
+            counter = counter + 1
+        return records
+
     def insert_from_dd( table_name, dd):
         return_string = f'INSERT INTO {table_name}'
         k_s = []
@@ -94,6 +101,18 @@ class StringUtil():
         for m in minute_amounts:
             return int(m[:-4])
         return None
+
+    def film_identity( s):
+        if re.match("tt\d+", s):
+            imdb_id = s
+            title   = None
+            year    = None
+        else:
+            imdb_id = None
+            title   = s
+            year    = None
+        return imdb_id, title, year
+
 
     def section_header( s):
         fancy_title  = f'||     {s}     ||'

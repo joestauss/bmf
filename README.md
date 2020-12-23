@@ -4,10 +4,7 @@ My current goal is to build a Twitter ArtBot, which I expect should be done by a
 
 # Files
 
-* **user_facing_classes** is the front end, what might eventually become an API.  It currently contains three classes:
- - _BaseFilmRecord_, which contains the data for a single film.
- - _BaseFilmCollection_ is a collection of film records.  It is set-based, unilke...
- - _BaseFilmDatabase_ is the interface to export a film collection to SQL.
+* A database is implemented as a group of three **User Facing Classes**: a _FilmRecord_, which contains the data for a single film; a _FilmCollection_, which contains a set of film records; and a _FilmDatabase_, which interface for a SQL representation of the data.  There are currently two types of databases: _Base_ classes (which don't try to find any data) and _Detailed_ classes (which do).
 * **webscrapers** contains methods for tasks that require only HTML parsing; it uses BeautifulSoup.
 * **broswer_automation** is for more complex tasks, where with a bot is used to communicate with a server; it uses Selenium.
 * **utility_methods** contains methods for string searching, data formatting, etc.  Eventually many of the methods in this module will be refactored into...
