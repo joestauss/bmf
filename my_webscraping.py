@@ -2,7 +2,8 @@ import requests
 import re
 import random
 from bs4 import BeautifulSoup
-import my_utility
+from utility_methods import StringUtil
+from scrapers import IMDB_Scraper
 
 class IMDB_Data():
     def __init__(self, imdb_id):
@@ -29,41 +30,8 @@ class IMDB_Data():
 
     def scrape_all(self):
         self.scrape_movie_data()
-        self.scrape_taglines()
-        self.scrape_production_cos()
-
-    def scrape_taglines(self):
-        self.taglines = set()
-        NUM_TAGLINES = 2
-        url = f'https://www.imdb.com/title/{self.imdb_id}/taglines'
-        r       =   requests.get(url)
-        soup = BeautifulSoup(r.text, 'html.parser')
-
-        tagline_divs = soup.find_all('div', class_='soda')
-
-        try:
-            selected_taglines = random.sample(tagline_divs, NUM_TAGLINES)
-        except:
-            selected_taglines = tagline_divs
-        for tagline in selected_taglines:
-            try:
-                self.taglines.add(tagline.text.strip())
-            except:
-                pass
-
-    def scrape_production_cos(self):
-        self.production_cos = set()
-        url = f'https://www.imdb.com/title/{self.imdb_id}/companycredits'
-        r       =   requests.get(url)
-        soup = BeautifulSoup(r.text, 'html.parser')
-
-        production_lst = soup.find_all('ul', class_='simpleList')
-
-        for tag in production_lst:
-            try:
-                self.production_cos.add(tag.a.text)
-            except:
-                pass
+        self.taglines   = IMDB_Scraper.taglines( self.imdb_id)
+        self.production_cos = IMDB_Scraper.production_companies( self.imdb_id)
 
     def scrape_movie_data(self):
         base_url =  f"https://www.imdb.com/title/{self.imdb_id}/"
@@ -108,19 +76,19 @@ class IMDB_Data():
         details_div = soup.find('div', id='titleDetails')
         try:
             budget_div  = search_in_soup( details_div, 'div', 'Budget')
-            self.budget = my_utility.find_dollar_amount(budget_div.text)
+            self.budget = StringUtil.dollar_amount(budget_div.text)
         except:
             self.budget = None
 
         try:
             boxOffice_div  = search_in_soup( details_div, 'div', 'Cumulative Worldwide Gross')
-            self.box_office = my_utility.find_dollar_amount(boxOffice_div.text)
+            self.box_office = StringUtil.dollar_amount(boxOffice_div.text)
         except:
             self.box_office = None
 
         try:
             runtime_div = search_in_soup( details_div, 'div', 'Runtime')
-            self.runtime = my_utility.find_minute_amount( runtime_div.text)
+            self.runtime = StringUtil.minute_amount( runtime_div.text)
         except:
             self.runtime = None
 

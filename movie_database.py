@@ -1,4 +1,4 @@
-import my_utility
+from utility_methods import StringUtil, SQLUtil
 import my_webscraping as wbsp
 
 class MovieCollection():
@@ -18,7 +18,7 @@ class MovieCollection():
             if hasattr( m, 'title') and hasattr( m, 'year'):
                 r.append( f"{m.year} - {m.title}")
         r.sort()
-        return my_utility.section_header('Movie List') + "\n" + "\n".join( r)
+        return StringUtil.section_header('Movie List') + "\n" + "\n".join( r)
 
 class NormalizedMovieDatabase():
     def __init__(self, movie_collection):
@@ -39,15 +39,15 @@ class NormalizedMovieDatabase():
         unnormalized_data = {'Genre' : [] , 'Production' : [], 'Person' : []}
         for movie in self.movies:
             for genre in movie.genres:
-                unnormalized_data['Genre'].append((movie.imdb_id, my_utility.text_field_s(genre)))
+                unnormalized_data['Genre'].append((movie.imdb_id, SQLUtil.text_field_s(genre)))
             for prod_co in movie.production_cos:
-                unnormalized_data['Production'].append((movie.imdb_id, my_utility.text_field_s(prod_co)))
+                unnormalized_data['Production'].append((movie.imdb_id, SQLUtil.text_field_s(prod_co)))
             for person in movie.directors:
-                unnormalized_data['Person'].append((movie.imdb_id, 0, my_utility.text_field_s(person)))
+                unnormalized_data['Person'].append((movie.imdb_id, 0, SQLUtil.text_field_s(person)))
             for person in movie.writers:
-                unnormalized_data['Person'].append((movie.imdb_id, 1, my_utility.text_field_s(person)))
+                unnormalized_data['Person'].append((movie.imdb_id, 1, SQLUtil.text_field_s(person)))
             for person in movie.actors:
-                unnormalized_data['Person'].append((movie.imdb_id, 2, my_utility.text_field_s(person)))
+                unnormalized_data['Person'].append((movie.imdb_id, 2, SQLUtil.text_field_s(person)))
 
         MN_relationship = {
             # a:b where
@@ -67,7 +67,7 @@ class NormalizedMovieDatabase():
             'Person': ['person_id', 'person_name']
         }
         for term, conn in MN_relationship.items():
-            self.tables[term], self.tables[conn] = my_utility.normalize_many_to_many(
+            self.tables[term], self.tables[conn] = SQLUtil.normalize_many_to_many(
             unnormalized_data[term],
             cols[term],
             cols[conn]
@@ -91,7 +91,7 @@ class NormalizedMovieDatabase():
                 tagline_entries.append( {
                     'tagline_id' : tagline_counter,
                     'movie_id'   : movie.imdb_id,
-                    'tagline_text': my_utility.text_field_m( tagline)
+                    'tagline_text': SQLUtil.text_field_m( tagline)
                 })
                 tagline_counter = tagline_counter + 1
         self.tables['Tagline'] = tagline_entries
@@ -113,7 +113,7 @@ class NormalizedMovieDatabase():
         for table_name in load_order:
             temp = []
             for dd in self.tables[table_name]:
-                temp.append(my_utility.sql_insert_from_dd(table_name, dd))
+                temp.append(SQLUtil.insert_from_dd(table_name, dd))
             all_tables.append( '\n'.join(temp))
 
         return "\n\n".join( all_tables)
