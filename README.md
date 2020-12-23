@@ -14,13 +14,5 @@ My current goal is to build a Twitter ArtBot, which I expect should be done by a
 
 ## Files --- Example Notebooks
 
-* **IMDB Webscraping Example** --- construction of a dataset based on six classic films directed by David Lean.
+* **Detailed Film Collections vs Base** --- demonstrates the difference between Base and Detailed objects with SQL INSERT INTO statements.
 * **Recursive Recomendations Example** --- automated IMDB crawling to find recommendations, recommendations-of-recommendations, etc.
-
-# DevLog
-
-1. __12/22/20__ --- Repository created; first version of files uploaded.  Began a refactor.
-1. __12/23/20__ --- Completed refactor, no new functionality but a better foundation to grow.
- - The code organization scheme is totally different than it was before.
- - All of the modules are now class-based.  I'm still deciding on a format for some of the classes, but on the whole it's been a great change, and it's especially nice in that it applies to the whole codebase.
-  - Production companies and taglines are now scraping correctly.
