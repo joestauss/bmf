@@ -7,33 +7,14 @@ class SoupUtil():
         r       =   requests.get(url)
         return BeautifulSoup(r.text, 'html.parser')
 
+    def search_in_soup(soup, tag_type, search_text):
+        candidates = soup.find_all(tag_type)
 
-class StringUtil():
-    def dollar_amount( s):
-        dollar_amounts = re.findall(r'\$[0-9,]+', s)
-        for d in dollar_amounts:
-            return int(d[1:].replace(',', ''))
+        for c in candidates:
+            tag_text = c.text
+            if re.search(search_text, tag_text):
+                return c
         return None
-
-    def minute_amount( s):
-        minute_amounts = re.findall(r'[0-9]+ min', s)
-        for m in minute_amounts:
-            return int(m[:-4])
-        return None
-
-    def section_header( s):
-        fancy_title  = f'||     {s}     ||'
-        fancy_break = '||' + ' '*(len(fancy_title) - 4) + '||'
-        fancy_line = '=' * len(fancy_title)
-        return '\n'.join([
-            fancy_line,
-            fancy_break,
-            fancy_title,
-            fancy_break,
-            fancy_line
-        ])
-
-
 
 class SQLUtil():
     def insert_from_dd( table_name, dd):
@@ -98,3 +79,30 @@ class SQLUtil():
 
     def text_field_s(s):
         return SQLUtil._text_field(s, 45)
+
+
+
+class StringUtil():
+    def dollar_amount( s):
+        dollar_amounts = re.findall(r'\$[0-9,]+', s)
+        for d in dollar_amounts:
+            return int(d[1:].replace(',', ''))
+        return None
+
+    def minute_amount( s):
+        minute_amounts = re.findall(r'[0-9]+ min', s)
+        for m in minute_amounts:
+            return int(m[:-4])
+        return None
+
+    def section_header( s):
+        fancy_title  = f'||     {s}     ||'
+        fancy_break = '||' + ' '*(len(fancy_title) - 4) + '||'
+        fancy_line = '=' * len(fancy_title)
+        return '\n'.join([
+            fancy_line,
+            fancy_break,
+            fancy_title,
+            fancy_break,
+            fancy_line
+        ])
