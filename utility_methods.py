@@ -38,38 +38,28 @@ class SQLUtil():
                 v_s.append(str(v))
         return f'{return_string} ({", ".join(k_s)}) VALUES ({", ".join(v_s)});'
 
-    def normalize_many_to_many(
-        unnormalized_data,
-            # The data will be normalized off of the final column.
-            #
-        terminal_table_cols,
-        intermediate_table_cols
-    ):
-        unique_values = []
-        for record in unnormalized_data:
-            final_val = record[-1]
-            if final_val not in unique_values:
-                unique_values.append(final_val)
+    def normalize_many_to_many ( names, data_dictionary):
+        #   names should be a 2-tuple:
+        #       (column to normalize off of,
+        #        name for newly normalized column)
+        #
+        (norm_col, connecting_col) = names
+        unique_norm_col_values = []
+        for record in data_dictionary:
+            norm_col_value = record[ norm_col]
+            if norm_col_value not in unique_norm_col_values:
+                unique_norm_col_values.append( norm_col_value)
 
-        terminal_table = []
-        lookup_val = {}
-        for i in range( len(unique_values)):
-            val = unique_values[i]
-            terminal_table.append({
-                terminal_table_cols[0]: i,
-                terminal_table_cols[1]: val
-            })
-            lookup_val[val] = i
+        terminal_table = [
+            {norm_col : i, connecting_col: value}
+            for i, value in enumerate(unique_norm_col_values)]
+        lookup = { value: i for i, value in enumerate(unique_norm_col_values)}
 
-        intermediate_table = []
-        for record in unnormalized_data:
-            dd = {}
-            n = len(record)
-            for i in range(n - 1):
-                dd[intermediate_table_cols[i]] = record[i]
-            dd[intermediate_table_cols[n-1]] = lookup_val[record[n-1]]
-            intermediate_table.append(dd)
-        return terminal_table, intermediate_table
+        for record in data_dictionary:
+            record[ connecting_col] = lookup[ record[ norm_col]]
+            record.pop( norm_col)
+
+        return terminal_table, data_dictionary
 
     def _text_field(s, l):
         TEXT_LENGTH = l

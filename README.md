@@ -4,7 +4,7 @@ My current goal is to build a Twitter ArtBot, which I expect should be done by a
 
 # Files
 
-* A database is implemented as a group of three **User Facing Classes**: a _FilmRecord_, which contains the data for a single film; a _FilmCollection_, which contains a set of film records; and a _FilmDatabase_, which interface for a SQL representation of the data.  There are currently two types of databases: _Base_ classes (which don't try to find any data) and _Detailed_ classes (which do).
+* There are currently three _user facing classes_ that constitute the API: a __FilmRecord__, which contains the data for a single film; a _FilmCollection_, which contains a set of film records; and a __FilmDatabase__, which interface for a SQL representation of the data.  There are currently several types of records, collections, databases- I'm still deciding on the final arrangement of them.
 * **webscrapers** contains methods for tasks that require only HTML parsing; it uses BeautifulSoup.
 * **broswer_automation** is for more complex tasks, where with a bot is used to communicate with a server; it uses Selenium.
 * **utility_methods** contains methods for string searching, data formatting, etc.  Eventually many of the methods in this module will be refactored into...
@@ -14,13 +14,5 @@ My current goal is to build a Twitter ArtBot, which I expect should be done by a
 
 ## Files --- Example Notebooks
 
-* **IMDB Webscraping Example** --- construction of a dataset based on six classic films directed by David Lean.
+* **Film Collection Classes** --- demonstrates the difference between Base, Tagline, and Detailed classes.
 * **Recursive Recomendations Example** --- automated IMDB crawling to find recommendations, recommendations-of-recommendations, etc.
-
-# DevLog
-
-1. __12/22/20__ --- Repository created; first version of files uploaded.  Began a refactor.
-1. __12/23/20__ --- Completed refactor, no new functionality but a better foundation to grow.
- - The code organization scheme is totally different than it was before.
- - All of the modules are now class-based.  I'm still deciding on a format for some of the classes, but on the whole it's been a great change, and it's especially nice in that it applies to the whole codebase.
-  - Production companies and taglines are now scraping correctly.
