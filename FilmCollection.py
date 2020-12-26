@@ -1,6 +1,7 @@
 from FilmRecord import *
 
 class BaseFilmCollection():
+    RECORD_TYPE = BaseFilmRecord
     def __init__(self, input_list, VERBOSE=False):
         self.movies = set()
         for i, input_item in enumerate(input_list, 1):
@@ -15,12 +16,10 @@ class BaseFilmCollection():
         return "\n".join(r)
 
     def add_record( self, item):
-        self.movies.add( BaseFilmRecord( item))
+        self.movies.add( self.RECORD_TYPE( item))
 
 class TaglineFilmCollection( BaseFilmCollection):
-    def add_record( self, item):
-        self.movies.add( TaglineFilmRecord( item))
+    RECORD_TYPE = TaglineFilmRecord
 
 class DetailedFilmCollection( BaseFilmCollection):
-    def add_record( self, item):
-        self.movies.add( DetailedFilmRecord( item))
+    RECORD_TYPE = DetailedFilmRecord

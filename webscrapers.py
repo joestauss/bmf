@@ -82,9 +82,6 @@ class IMDB_Scraper():
             dd['genres'] = set()
         return dd
 
-
-
-
     def taglines(imdb_id, NUM_TAGLINES = 2):
         taglines = set()
         try:

@@ -18,9 +18,7 @@ class IMDB_Tools():
             return all_movies
         else:
             print( f"{num_layers} recursive layers remain.")
-
             new_movies = set([])
-
             for movie in imdb_ids:
                 print( f"\t\tGetting recs from {movie}")
                 recs = IMDB_Tools.get_recomendations( movie, recs_per_film)

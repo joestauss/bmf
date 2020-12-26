@@ -103,7 +103,6 @@ class StringUtil():
             year    = None
         return imdb_id, title, year
 
-
     def section_header( s):
         fancy_title  = f'||     {s}     ||'
         fancy_break = '||' + ' '*(len(fancy_title) - 4) + '||'
