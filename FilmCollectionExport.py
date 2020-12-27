@@ -2,140 +2,105 @@ from utility_methods import SQLUtil
 from FilmCollection import *
 
 class BaseSQLExport():
-    load_order = ['Movie']
-    mn_tuples = []
-    pk_only = []
-
     def __init__(self, movie_collection):
         self.movies = movie_collection.movies
-        self.tables = { table_name : [] for table_name in self.load_order }
-        self.load_data()
-        self.normalize_MN_relationships()
-        self.add_primary_keys()
+        self.initialize_tables()
 
-    def load_data( self):
-        for movie in self.movies:
-            self.tables['Movie'].append( self.movie_data_as_row( movie))
+    def __str__(self):
+        return "\n\n".join([ self.tables[table_name].InsertAllInto(table_name) for table_name in self.load_order])
 
-    def add_primary_keys(self):
-        for (table_name, pk_col) in self.pk_only:
-            self.tables[table_name] = SQLUtil.add_primary_key( pk_col, self.tables[ table_name])
+    def initialize_tables( self):
+        self.tables = {}
+        self.tables['Movie'] = SQLUtil.Table( self.unprocessed_movie_data)
+        self.load_order = ['Movie']
 
-    def normalize_MN_relationships(self):
-        for (terminal_table_name, connecting_table_name, col_names) in self.mn_tuples:
-            (self.tables[terminal_table_name  ],
-             self.tables[connecting_table_name]) = SQLUtil.normalize_many_to_many(
-                col_names,
-                self.tables[terminal_table_name] )
+    @property
+    def unprocessed_movie_data(self):
+        return [ self.movie_data_as_row( movie) for movie in self.movies]
 
     def movie_data_as_row(self, movie):
         return { 'movie_id'    : movie.imdb_id,
                  'movie_title' : movie.title,
                  'movie_year'  : movie.year }
 
-    def as_sql(self):
-        all_tables = []
-        for table_name in self.load_order:
-            temp = []
-            for dd in self.tables[table_name]:
-                temp.append(SQLUtil.insert_from_dd(table_name, dd))
-            all_tables.append( '\n'.join(temp))
-        return "\n\n".join( all_tables)
-
-    def __str__(self):
-        return self.as_sql()
-
 class TaglineSQLExport( BaseSQLExport):
-    load_order = ['Movie', 'Tagline']
+    def initialize_tables( self):
+        super().initialize_tables()
+        self.tables['Tagline'] = SQLUtil.Table( self.unprocessed_tagline_data)
+        self.tables['Tagline'].AddPrimaryKey( 'tagline_id')
+        self.load_order = self.load_order + ['Tagline']
 
     @property
-    def pk_only( self):
-        return super().pk_only + [ ('Tagline', 'tagline_id')]
-
-    def load_data( self):
-        super().load_data()
-        self.load_taglines_table()
-
-    def load_taglines_table( self):
-        self.tables['Tagline'] = []
+    def unprocessed_tagline_data( self):
+        dat = []
         for movie in self.movies:
-            for tagline in movie.taglines:
-                self.tables['Tagline'].append({
-                    'movie_id'   : movie.imdb_id,
-                    'tagline_text': SQLUtil.text_field_m( tagline)
-                } )
+            dat = dat + [{
+                'movie_id'   : movie.imdb_id,
+                'tagline_text': SQLUtil.text_field_m( tagline)}
+            for tagline in movie.taglines ]
+        return dat
 
 class ProductionSQLExport( BaseSQLExport):
-    load_order = ['Movie', 'Production', 'MovieProduction']
+    def initialize_tables( self):
+        super().initialize_tables()
+        self.tables['MovieProduction'] = SQLUtil.Table( self.unprocessed_production_data)
+        self.tables['Production'] = self.tables['MovieProduction'].NormalizeColumn( 'production_name', 'production_id')
+        self.load_order = self.load_order +  ['Production', 'MovieProduction']
 
     @property
-    def mn_tuples( self):
-        return super().mn_tuples + [('Production', 'MovieProduction', ('production_name', 'production_id'))]
-
-    def load_data( self):
-        super().load_data()
-        self.load_normalized_production_tables()
-
-    def load_normalized_production_tables( self):
+    def unprocessed_production_data( self):
+        dat = []
         for movie in self.movies:
-            for prod_co in movie.production_cos:
-                self.tables['Production'].append(
-                    {'movie_id': movie.imdb_id,
-                    'production_name':  SQLUtil.text_field_s(prod_co) })
+            dat = dat + [{
+                'movie_id'   : movie.imdb_id,
+                'production_name': SQLUtil.text_field_s( prod_co)}
+            for prod_co in movie.production_cos ]
+        return dat
 
 class GenreSQLExport( BaseSQLExport):
-    load_order = ['Movie', 'Production', 'MovieProduction']
+    def initialize_tables( self):
+        super().initialize_tables()
+        self.tables['MovieGenre'] = SQLUtil.Table( self.unprocessed_genre_data)
+        self.tables['Genre'] = self.tables['MovieGenre'].NormalizeColumn( 'genre_name', 'genre_id')
+        self.load_order = self.load_order +  ['Genre', 'MovieGenre']
 
     @property
-    def mn_tuples( self):
-        return super().mn_tuples + [('Genre', 'MovieGenre', ('genre_name', 'genre_id') )]
-
-    def load_data( self):
-        super().load_data()
-        self.load_genre_tables()
-
-    def load_genre_tables( self):
+    def unprocessed_genre_data( self):
+        dat = []
         for movie in self.movies:
-            for genre in movie.genres:
-                self.tables['Genre'].append(
-                    {'movie_id': movie.imdb_id, 'genre_name':  SQLUtil.text_field_s(genre)})
+            dat = dat + [{
+                'movie_id'   : movie.imdb_id,
+                'genre_name': SQLUtil.text_field_s( genre)}
+            for genre in movie.genres ]
+        return dat
 
 class SmallCastSQLExport( BaseSQLExport):
-    load_order = ['Movie', 'Person', 'RoleCode', 'Role']
+    def initialize_tables( self):
+        super().initialize_tables()
+        self.tables['RoleCode'] = SQLUtil.Table( [ {'role_name' : role } for role in ['Director', 'Writer', 'Actor'] ])
+        self.tables['RoleCode'].AddPrimaryKey('role_code')
+        self.tables['Role'] = SQLUtil.Table( self.unprocessed_small_cast_data)
+        self.tables['Person'] = self.tables['Role'].NormalizeColumn( 'person_name', 'person_id')
+        self.load_order = self.load_order + ['Person', 'RoleCode', 'Role']
 
     @property
-    def mn_tuples(self):
-        return super().mn_tuples + [('Person', 'Role', ('person_name', 'person_id')) ]
-
-    @property
-    def pk_only( self):
-        return super().pk_only + [ ('RoleCode', 'role_code')]
-
-    def load_data(self):
-        super().load_data()
-        self.load_small_cast()
-
-    def load_small_cast( self):
-        self.tables['RoleCode'] = [ {'role_name' : role } for role in ['Director', 'Writer', 'Actor'] ]
+    def unprocessed_small_cast_data( self):
+        dat = []
         for movie in self.movies:
             for person in movie.directors:
-                self.tables['Person'].append(
-                    {'movie_id': movie.imdb_id, 'person_name': SQLUtil.text_field_s(person), 'role_code':0})
+                dat.append( {'movie_id': movie.imdb_id, 'person_name': SQLUtil.text_field_s(person), 'role_code':0})
             for person in movie.writers:
-                self.tables['Person'].append(
-                    {'movie_id': movie.imdb_id, 'person_name': SQLUtil.text_field_s(person), 'role_code':1})
+                dat.append( {'movie_id': movie.imdb_id, 'person_name': SQLUtil.text_field_s(person), 'role_code':1})
             for person in movie.actors:
-                self.tables['Person'].append(
-                    {'movie_id': movie.imdb_id, 'person_name': SQLUtil.text_field_s(person), 'role_code':2})
+                dat.append({'movie_id': movie.imdb_id, 'person_name': SQLUtil.text_field_s(person), 'role_code':2})
+        return dat
 
 class DetailedSQLExport(TaglineSQLExport, ProductionSQLExport, GenreSQLExport, SmallCastSQLExport):
-    load_order = ['Movie', 'Genre', 'MovieGenre', 'Production', 'MovieProduction', 'Person', 'RoleCode', 'Role',  'Tagline']
-
     def movie_data_as_row(self, movie):
-        dd = super().movie_data_as_row(movie)
-        dd.update({
+        dat = super().movie_data_as_row(movie)
+        dat.update({
             'movie_budget' : movie.budget,
             'movie_boxoffice' : movie.box_office,
             'movie_runtime': movie.runtime
         })
-        return dd
+        return dat

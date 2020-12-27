@@ -16,12 +16,22 @@ class SoupUtil():
         return None
 
 class SQLUtil():
-    def add_primary_key( primary_key_name, records):
-        counter = 0
-        for record in records:
-            record[ primary_key_name] = counter
-            counter = counter + 1
-        return records
+    class Table():
+        def __init__( self, rows):
+            self.rows = rows
+
+        def InsertAllInto( self, target_table):
+            return "\n".join(  [SQLUtil.insert_from_dd( target_table, row) for row in self.rows])
+
+        def AddPrimaryKey( self, primary_key_name):
+            counter = 0
+            for row in self.rows:
+                row[ primary_key_name] = counter
+                counter = counter + 1
+
+        def NormalizeColumn( self, normalization_column, connecting_column):
+            terminal_table_data, self.rows = SQLUtil.normalize_many_to_many( (normalization_column, connecting_column), self.rows )
+            return SQLUtil.Table( terminal_table_data)
 
     def insert_from_dd( table_name, dd):
         return_string = f'INSERT INTO {table_name}'
@@ -37,14 +47,14 @@ class SQLUtil():
                 v_s.append(str(v))
         return f'{return_string} ({", ".join(k_s)}) VALUES ({", ".join(v_s)});'
 
-    def normalize_many_to_many ( names, data_dictionary):
+    def normalize_many_to_many ( names, record_list):
         #   names should be a 2-tuple:
         #       (column to normalize off of,
-        #        name for newly normalized column)
+        #        name for new intermediate column)
         #
         (norm_col, connecting_col) = names
         unique_norm_col_values = []
-        for record in data_dictionary:
+        for record in record_list:
             norm_col_value = record[ norm_col]
             if norm_col_value not in unique_norm_col_values:
                 unique_norm_col_values.append( norm_col_value)
@@ -54,11 +64,11 @@ class SQLUtil():
             for i, value in enumerate(unique_norm_col_values)]
         lookup = { value: i for i, value in enumerate(unique_norm_col_values)}
 
-        for record in data_dictionary:
+        for record in record_list:
             record[ connecting_col] = lookup[ record[ norm_col]]
             record.pop( norm_col)
 
-        return terminal_table, data_dictionary
+        return terminal_table, record_list
 
     def _text_field(s, l):
         TEXT_LENGTH = l
