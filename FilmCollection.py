@@ -18,6 +18,12 @@ class BaseFilmCollection():
     def add_record( self, item):
         self.movies.add( self.RECORD_TYPE( item))
 
+    def identify_all( self, VERBOSE=False):
+        for movie in self.movies:
+            movie.identify( VERBOSE=VERBOSE)
+            if VERBOSE:
+                print()
+
 class TaglineFilmCollection( BaseFilmCollection):
     RECORD_TYPE = TaglineFilmRecord
 

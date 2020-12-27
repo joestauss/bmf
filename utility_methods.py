@@ -4,12 +4,11 @@ from bs4 import BeautifulSoup
 
 class SoupUtil():
     def soup_from_url( url):
-        r       =   requests.get(url)
+        r = requests.get(url)
         return BeautifulSoup(r.text, 'html.parser')
 
     def search_in_soup(soup, tag_type, search_text):
         candidates = soup.find_all(tag_type)
-
         for c in candidates:
             tag_text = c.text
             if re.search(search_text, tag_text):
@@ -93,24 +92,40 @@ class StringUtil():
         return None
 
     def film_identity( s):
+        imdb_id, title, year = None, None, None
         if re.match("tt\d+", s):
             imdb_id = s
-            title   = None
-            year    = None
+        elif re.search("\(\d\d\d\d\)$", s):
+            year, title  = int(s[-5:-1]), s[:-6].strip()
         else:
-            imdb_id = None
-            title   = s
-            year    = None
+            title = s
         return imdb_id, title, year
 
-    def section_header( s):
-        fancy_title  = f'||     {s}     ||'
-        fancy_break = '||' + ' '*(len(fancy_title) - 4) + '||'
-        fancy_line = '=' * len(fancy_title)
-        return '\n'.join([
-            fancy_line,
-            fancy_break,
-            fancy_title,
-            fancy_break,
-            fancy_line
-        ])
+    def section_header( input_item):
+        #   input_item can be either a string or a list of strings.
+        #
+        if isinstance( input_item, str):
+            title  = f'||     {input_item}     ||'
+            gap = '||' + ' '*(len(title) - 4) + '||'
+            h_line = '=' * len(title)
+
+        if isinstance( input_item, list):
+            title_strings = []
+            longest_string_length = 0
+            for item in input_item : #   Find the longest header string.
+                title_string = f'||     {item}     ||'
+                current_string_length = len(title_string)
+                if current_string_length > longest_string_length:
+                    longest_string_length = current_string_length
+            for item in input_item: # Find the string that will actually be used.
+                title_string = f'||     {item}' + ' '*(longest_string_length - len(item) - 9) + '||'
+                title_strings.append(title_string)
+            h_line = "=" * longest_string_length
+            gap = '||' + ' '*(longest_string_length - 4) + '||'
+            title = "\n".join(title_strings)
+
+        try:
+            print_objects = [ h_line, gap, title, gap, h_line]
+            return "\n".join(print_objects)
+        except:
+            return "||    ERROR PRINTING HEADER"

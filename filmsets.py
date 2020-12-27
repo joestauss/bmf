@@ -3,6 +3,9 @@
 #
 
 class TestSets():
+    class MixedFormat():
+        tiny = ['tt0042376', 'Tommy Boy (1995)']
+        medium = ['tt0042376', 'Tommy Boy (1995)', 'The Matrix (1984)', 'The Ice Pirates', 'beep boop im not a real movie', 'tt4']
 
     tiny_list = ['tt0859635']
     one_missing_taglines = {'tt8820258', 'tt0859635', 'tt0247745'}
