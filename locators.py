@@ -17,6 +17,12 @@ class SoupLocator():
                             r.append( (imdb_id, title, year))
                 return r
 
+        class Person():
+            def acting_filmography( soup):
+                actor_filmography = soup.find(class_='filmo-category-section')
+                full_acting_credits = actor_filmography.find_all(class_='filmo-row')
+                return SoupUtil.filmography_filter( full_acting_credits)
+
         class MainPage():
             def title_and_year( soup):
                 title_div = soup.find('div', class_='title_wrapper')

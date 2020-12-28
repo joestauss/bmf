@@ -15,6 +15,23 @@ class SoupUtil():
                 return c
         return None
 
+    def filmography_filter( full_filmography):
+        r_vals = []
+        illegal_patterns = [
+            "(Video Game)", "(TV Series)", "uncredited", "(TV Movie)",
+            "(Video short)", "(Video)", "(TV Special)", "(Short)", "(scenes deleted)",
+            "(TV Mini-Series)", "(Documentary)", "(Concert Feature)", "(voice)"
+        ]
+        for item in full_filmography:
+            REGULAR_FILM = True
+            for illegal_pattern in illegal_patterns:
+                if re.search(illegal_pattern, item.text) :
+                    REGULAR_FILM = False
+
+            if REGULAR_FILM:
+                r_vals.append( item.find('a')["href"].split('/')[2])
+        return r_vals
+
 class SQLUtil():
     class Table():
         def __init__( self, rows):

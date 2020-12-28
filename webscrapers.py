@@ -1,5 +1,6 @@
 from utility_methods import SoupUtil
 from locators import SoupLocator
+import re
 
 class IMDB_Scraper():
     def scrape_main_page( imdb_id):
@@ -41,3 +42,10 @@ class IMDB_Scraper():
                 if abs(year - search_year) < smallest_difference:
                     return_id, return_year = imdb_id, year
         return return_id, return_year
+
+    def films_acted_in( imdb_id):
+        if not re.match("nm\d+", imdb_id):
+            return []
+        url = f'https://www.imdb.com/name/{imdb_id}/'
+        soup = SoupUtil.soup_from_url( url)
+        return SoupLocator.IMDB.Person.acting_filmography( soup)
