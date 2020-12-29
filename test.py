@@ -3,7 +3,7 @@ from filmsets import *
 from FilmCollection import *
 from webscrapers import *
 
-TEST_FIND_FILMOGRAPHY = True
+TEST_FIND_FILMOGRAPHY = False
 TEST_IDENTIFY_ALL     = False
 TEST_SECTION_HEADER   = False
 TEST_FILM_IDENTITY    = False
@@ -12,6 +12,7 @@ if TEST_FIND_FILMOGRAPHY:
     BRUCE_WILLIS_ID  = 'nm0000246'
     VINCENT_PRICE_ID = 'nm0001637'
     print(", ".join( [f'"{film}"' for film in IMDB_Scraper.films_acted_in( VINCENT_PRICE_ID)]))
+
 if TEST_IDENTIFY_ALL:
     coll = BaseFilmCollection( TestSets.MixedFormat.medium)
     coll.identify_all( VERBOSE=True)

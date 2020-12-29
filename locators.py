@@ -1,6 +1,30 @@
 from utility_methods import *
 from bs4 import BeautifulSoup
 import random
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+class SeleniumLocator():
+    class IMDB():
+        def recommendations( imdb_id):
+            URL = f"https://www.imdb.com/title/{imdb_id}/"
+            driver = webdriver.Chrome()
+            driver.get( URL)
+            recs = []
+            try:
+                recs_div = WebDriverWait(driver, 1).until(
+                    EC.presence_of_element_located((By.ID, "titleRecs"))
+                )
+                recs_temp = recs_div.find_elements(By.CLASS_NAME, 'rec_item')
+                for rec in recs_temp:
+                    rec_str = rec.get_attribute("data-tconst")
+                    if rec_str != imdb_id:
+                        recs.append(rec_str)
+            finally:
+                driver.quit()
+                return recs
 
 class SoupLocator():
     class IMDB():
