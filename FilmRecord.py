@@ -1,5 +1,5 @@
 from utility_methods import StringUtil
-from webscrapers import IMDB_Scraper
+from webscrapers import *
 
 class BaseFilmRecord():
     def __init__(self, imdb_id):
@@ -21,7 +21,7 @@ class BaseFilmRecord():
         return hash( self.imdb_id)
 
     def identify( self):
-        self.title, self.year = IMDB_Scraper.title_and_year( self.imdb_id)
+        self.title, self.year = Webscraper.IMDB.Film.title_and_year( self.imdb_id)
 
     def scrape_data( self):
         self.identify()
@@ -29,19 +29,19 @@ class BaseFilmRecord():
 class TaglineFilmRecord( BaseFilmRecord):
     def scrape_data(self):
         super().scrape_data()
-        self.taglines = IMDB_Scraper.taglines( self.imdb_id)
+        self.taglines = Webscraper.IMDB.Film.taglines( self.imdb_id)
         self.details.append( f'{len(self.taglines)} taglines')
 
 class ProductionFilmRecord( BaseFilmRecord):
     def scrape_data(self):
         super().scrape_data()
-        self.production_cos = IMDB_Scraper.production_companies( self.imdb_id)
+        self.production_cos = Webscraper.IMDB.Film.production_companies( self.imdb_id)
         self.details.append( f'{len(self.production_cos)} production companies')
 
 class DetailedFilmRecord(TaglineFilmRecord, ProductionFilmRecord):
     def scrape_data(self):
         super().scrape_data()
-        ttl_yr, sm_cst, detail, genres = IMDB_Scraper.scrape_main_page( self.imdb_id)
+        ttl_yr, sm_cst, detail, genres = Webscraper.IMDB.Film.main_page( self.imdb_id)
         self.title, self.year          = ttl_yr
         self.genres                    = genres
         self.actors, self.directors,  self.writers = sm_cst

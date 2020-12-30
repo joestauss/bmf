@@ -1,6 +1,20 @@
 import re
 import requests
 from bs4 import BeautifulSoup
+from selenium import webdriver
+
+class SeleniumUtil():
+    class DriverContext():
+        def __init__( self, url):
+            self.url = url
+
+        def __enter__(self):
+            self.driver = webdriver.Chrome()
+            self.driver.get(self.url)
+            return self.driver
+
+        def __exit__(self, exc_type, exc_value, exc_traceback):
+            self.driver.quit()
 
 class SoupUtil():
     def soup_from_url( url):
@@ -29,13 +43,26 @@ class SoupUtil():
                     REGULAR_FILM = False
 
             if REGULAR_FILM:
-                r_vals.append( item.find('a')["href"].split('/')[2])
+                r_vals.append( StringUtil.film_identity( item.find('a')["href"])[0])
         return r_vals
 
 class SQLUtil():
     class Table():
         def __init__( self, rows):
             self.rows = rows
+
+        def __eq__(self, other):
+            for row in other.rows:
+                if not self.contains_row(row):
+                    return False
+            return len(self.rows) == len(other.rows)
+
+        def contains_row( self, search_row):
+            for row in self.rows:
+                shared_cols = [ col for col in row if col in search_row and row[col] == search_row[col]]
+                if len(shared_cols) == len(row):
+                    return True
+            return False
 
         def InsertAllInto( self, target_table):
             return "\n".join(  [SQLUtil.insert_from_dd( target_table, row) for row in self.rows])
@@ -47,8 +74,20 @@ class SQLUtil():
                 counter = counter + 1
 
         def NormalizeColumn( self, normalization_column, connecting_column):
-            terminal_table_data, self.rows = SQLUtil.normalize_many_to_many( (normalization_column, connecting_column), self.rows )
-            return SQLUtil.Table( terminal_table_data)
+            unique_norm_col_values = []
+            for row in self.rows:
+                norm_col_value = row[ normalization_column]
+                if norm_col_value not in unique_norm_col_values:
+                    unique_norm_col_values.append( norm_col_value)
+
+            terminal_table = [ { connecting_column : i, normalization_column: value} for i, value in enumerate(unique_norm_col_values)]
+            lookup = { value: i for i, value in enumerate(unique_norm_col_values)}
+
+            for row in self.rows:
+                row[ connecting_column] = lookup[ row[ normalization_column]]
+                row.pop( normalization_column)
+
+            return SQLUtil.Table( terminal_table)
 
     def insert_from_dd( table_name, dd):
         return_string = f'INSERT INTO {table_name}'
@@ -63,29 +102,6 @@ class SQLUtil():
             else:
                 v_s.append(str(v))
         return f'{return_string} ({", ".join(k_s)}) VALUES ({", ".join(v_s)});'
-
-    def normalize_many_to_many ( names, record_list):
-        #   names should be a 2-tuple:
-        #       (column to normalize off of,
-        #        name for new intermediate column)
-        #
-        (norm_col, connecting_col) = names
-        unique_norm_col_values = []
-        for record in record_list:
-            norm_col_value = record[ norm_col]
-            if norm_col_value not in unique_norm_col_values:
-                unique_norm_col_values.append( norm_col_value)
-
-        terminal_table = [
-            {norm_col : i, connecting_col: value}
-            for i, value in enumerate(unique_norm_col_values)]
-        lookup = { value: i for i, value in enumerate(unique_norm_col_values)}
-
-        for record in record_list:
-            record[ connecting_col] = lookup[ record[ norm_col]]
-            record.pop( norm_col)
-
-        return terminal_table, record_list
 
     def _text_field(s, l):
         TEXT_LENGTH = l
@@ -118,10 +134,15 @@ class StringUtil():
             return int(m[:-4])
         return None
 
+    def person_id( s):
+        if re.search("nm\d+", s):
+            return re.findall("nm\d+", s)[0]
+        return None
+
     def film_identity( s):
         imdb_id, title, year = None, None, None
-        if re.match("tt\d+", s):
-            imdb_id = s
+        if re.search("tt\d+", s):
+            imdb_id = re.findall("tt\d+", s)[0]
         elif re.search("\(\d\d\d\d\)$", s):
             year, title  = int(s[-5:-1]), s[:-6].strip()
         else:
@@ -133,7 +154,7 @@ class StringUtil():
         #
         if isinstance( input_item, str):
             title  = f'||     {input_item}     ||'
-            gap = '||' + ' '*(len(title) - 4) + '||'
+            gap    =  '||' + ' '*(len(title) - 4) + '||'
             h_line = '=' * len(title)
 
         if isinstance( input_item, list):

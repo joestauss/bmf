@@ -7,10 +7,10 @@ from threading import Thread
 from utility_methods import *
 from webscrapers import *
 
-def ParallelExtraction( dataExtractionThread, inputs):
-    results_set = set()
+def BatchExtraction( dataExtractionThread, inputs):
+    results = {}
     threads = {}
-    MAX_THREADS = 10
+    BATCH_SIZE = 10
     THREAD_COUNT = 0
     item_groups = [[]]
     i = 0
@@ -18,33 +18,29 @@ def ParallelExtraction( dataExtractionThread, inputs):
         THREAD_COUNT = THREAD_COUNT + 1
         item_groups[i].append( item)
 
-        if THREAD_COUNT == MAX_THREADS:
+        if THREAD_COUNT == BATCH_SIZE:
             i = i + 1
             THREAD_COUNT = 0
             item_groups.append([])
 
     for item_group in item_groups:
-        thread_pool = {
-            item: dataExtractionThread( item, results_set)
-            for item in item_group }
+        thread_pool = { item: dataExtractionThread( item, results) for item in item_group }
         for item in item_group:
             thread_pool[item].start()
         for item in item_group:
             thread_pool[item].join()
 
-    return results_set
+    return results
 
 class IMDBExtractionThread():
     class BaseIMDBExtractionThread( Thread):
-        def __init__(self, imdb_id, output_set):
+        def __init__(self, imdb_id, output_dict):
             super().__init__()
             self.imdb_id = imdb_id
-            self.output_set = output_set
+            self.output_dict = output_dict
 
         def run( self):
-            temp_return = self.extract( self.imdb_id)
-            for item in temp_return:
-                self.output_set.add( item)
+            self.output_dict[ self.imdb_id] =  self.extract( self.imdb_id)
 
         def extract( self, imdb_id):
             return []
@@ -56,4 +52,18 @@ class IMDBExtractionThread():
 class DataExtraction():
     class Recommendations():
         def all( imdb_ids):
-            return ParallelExtraction( IMDBExtractionThread.Recommendations, imdb_ids)
+            recs = set()
+            recs_dictionary = BatchExtraction( IMDBExtractionThread.Recommendations, imdb_ids)
+            for imdb_id in recs_dictionary:
+                recs = recs | {rec for rec in recs_dictionary[imdb_id]}
+            return recs
+
+        def multiple_adjacency( imdb_ids):
+            rec_count = {}
+            recs_dictionary = BatchExtraction( IMDBExtractionThread.Recommendations, imdb_ids)
+            for imdb_id in recs_dictionary:
+                for rec in recs_dictionary[ imdb_id]:
+                    if rec not in rec_count:
+                        rec_count[ rec] = 0
+                    rec_count[ rec] = rec_count[ rec] + 1
+            return {rec for rec in rec_count if rec_count[ rec] > 1}

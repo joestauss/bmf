@@ -16,7 +16,7 @@ class BaseSQLExport():
 
     @property
     def unprocessed_movie_data(self):
-        return [ self.movie_data_as_row( movie) for movie in self.movies]
+        return [ self.movie_data_as_row( movie) for movie in self.movies if isinstance(movie, BaseFilmRecord)]
 
     def movie_data_as_row(self, movie):
         return { 'movie_id'    : movie.imdb_id,
@@ -34,10 +34,11 @@ class TaglineSQLExport( BaseSQLExport):
     def unprocessed_tagline_data( self):
         dat = []
         for movie in self.movies:
-            dat = dat + [{
-                'movie_id'   : movie.imdb_id,
-                'tagline_text': SQLUtil.text_field_m( tagline)}
-            for tagline in movie.taglines ]
+            if isinstance(movie, TaglineFilmRecord):
+                dat = dat + [{
+                    'movie_id'   : movie.imdb_id,
+                    'tagline_text': SQLUtil.text_field_m( tagline)}
+                for tagline in movie.taglines ]
         return dat
 
 class ProductionSQLExport( BaseSQLExport):
@@ -51,10 +52,11 @@ class ProductionSQLExport( BaseSQLExport):
     def unprocessed_production_data( self):
         dat = []
         for movie in self.movies:
-            dat = dat + [{
-                'movie_id'   : movie.imdb_id,
-                'production_name': SQLUtil.text_field_s( prod_co)}
-            for prod_co in movie.production_cos ]
+            if isinstance(movie, ProductionFilmRecord):
+                dat = dat + [{
+                    'movie_id'   : movie.imdb_id,
+                    'production_name': SQLUtil.text_field_s( prod_co)}
+                for prod_co in movie.production_cos ]
         return dat
 
 class GenreSQLExport( BaseSQLExport):
@@ -68,10 +70,11 @@ class GenreSQLExport( BaseSQLExport):
     def unprocessed_genre_data( self):
         dat = []
         for movie in self.movies:
-            dat = dat + [{
-                'movie_id'   : movie.imdb_id,
-                'genre_name': SQLUtil.text_field_s( genre)}
-            for genre in movie.genres ]
+            if isinstance(movie, DetailedFilmRecord):
+                dat = dat + [{
+                    'movie_id'   : movie.imdb_id,
+                    'genre_name': SQLUtil.text_field_s( genre)}
+                for genre in movie.genres ]
         return dat
 
 class SmallCastSQLExport( BaseSQLExport):
@@ -87,20 +90,22 @@ class SmallCastSQLExport( BaseSQLExport):
     def unprocessed_small_cast_data( self):
         dat = []
         for movie in self.movies:
-            for person in movie.directors:
-                dat.append( {'movie_id': movie.imdb_id, 'person_name': SQLUtil.text_field_s(person), 'role_code':0})
-            for person in movie.writers:
-                dat.append( {'movie_id': movie.imdb_id, 'person_name': SQLUtil.text_field_s(person), 'role_code':1})
-            for person in movie.actors:
-                dat.append({'movie_id': movie.imdb_id, 'person_name': SQLUtil.text_field_s(person), 'role_code':2})
+            if isinstance(movie, DetailedFilmRecord):
+                for person in movie.directors:
+                    dat.append( {'movie_id': movie.imdb_id, 'person_name': SQLUtil.text_field_s(person), 'role_code':0})
+                for person in movie.writers:
+                    dat.append( {'movie_id': movie.imdb_id, 'person_name': SQLUtil.text_field_s(person), 'role_code':1})
+                for person in movie.actors:
+                    dat.append({'movie_id': movie.imdb_id, 'person_name': SQLUtil.text_field_s(person), 'role_code':2})
         return dat
 
 class DetailedSQLExport(TaglineSQLExport, ProductionSQLExport, GenreSQLExport, SmallCastSQLExport):
     def movie_data_as_row(self, movie):
         dat = super().movie_data_as_row(movie)
-        dat.update({
-            'movie_budget' : movie.budget,
-            'movie_boxoffice' : movie.box_office,
-            'movie_runtime': movie.runtime
-        })
+        if isinstance(movie, DetailedFilmRecord):
+            dat.update({
+                'movie_budget' : movie.budget,
+                'movie_boxoffice' : movie.box_office,
+                'movie_runtime': movie.runtime
+            })
         return dat

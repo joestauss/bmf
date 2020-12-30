@@ -1,7 +1,6 @@
 from utility_methods import *
 from bs4 import BeautifulSoup
 import random
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -9,28 +8,22 @@ from selenium.webdriver.support import expected_conditions as EC
 class SeleniumLocator():
     class IMDB():
         def recommendations( imdb_id):
-            URL = f"https://www.imdb.com/title/{imdb_id}/"
-            driver = webdriver.Chrome()
-            driver.get( URL)
+            url = f"https://www.imdb.com/title/{imdb_id}/"
             recs = []
-            try:
-                recs_div = WebDriverWait(driver, 1).until(
-                    EC.presence_of_element_located((By.ID, "titleRecs"))
-                )
+            with SeleniumUtil.DriverContext( url) as driver:
+                recs_div = WebDriverWait(driver, 1).until( EC.presence_of_element_located((By.ID, "titleRecs")))
                 recs_temp = recs_div.find_elements(By.CLASS_NAME, 'rec_item')
                 for rec in recs_temp:
                     rec_str = rec.get_attribute("data-tconst")
                     if rec_str != imdb_id:
                         recs.append(rec_str)
-            finally:
-                driver.quit()
-                return recs
+            return recs
 
 class SoupLocator():
     class IMDB():
         class Search():
             def films( soup):
-                r = [] # this is a list because order numbers.
+                r = []
                 result_categories = soup.find_all('div', class_='findSection')
                 for category in result_categories:
                     if category.find('h3').text == 'Titles':
@@ -41,7 +34,19 @@ class SoupLocator():
                             r.append( (imdb_id, title, year))
                 return r
 
+            def person( soup):
+                r = None
+                result_categories = soup.find_all('div', class_='findSection')
+                for category in result_categories:
+                    if category.find('h3').text == 'Names':
+                        name_results = category.find_all('td', class_='result_text')
+                        r = StringUtil.person_id( name_results[0].find('a')['href'])
+                return r
+
         class Person():
+            def full_name( soup):
+                return soup.find('title').text.split('-')[0].strip()
+
             def acting_filmography( soup):
                 actor_filmography = soup.find(class_='filmo-category-section')
                 full_acting_credits = actor_filmography.find_all(class_='filmo-row')

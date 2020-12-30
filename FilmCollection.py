@@ -20,10 +20,13 @@ class BaseFilmCollection():
         return "\n".join(r)
 
     def add_record( self, item):
-        imdb_id, title, year = StringUtil.film_identity( item)
-        if not imdb_id:
-            imdb_id, _ = IMDB_Scraper.search_by_title_and_year( title, year)
-        self.movies.add( self.RECORD_TYPE( imdb_id))
+        if isinstance(item, BaseFilmRecord):
+            self.movies.add( item)
+        else:
+            imdb_id, title, year = StringUtil.film_identity( item)
+            if not imdb_id:
+                imdb_id, _ = Webscraper.IMDB.Search.by_title_and_year( title, year)
+            self.movies.add( self.RECORD_TYPE( imdb_id))
 
     def identify_all( self):
         threads = {}
@@ -46,18 +49,6 @@ class BaseFilmCollection():
             threads[movie].join()
             counter = counter - 1
 
-
-class TaglineFilmCollection( BaseFilmCollection):
-    RECORD_TYPE = TaglineFilmRecord
-
-class DetailedFilmCollection( BaseFilmCollection):
-    RECORD_TYPE = DetailedFilmRecord
-
-class ExpandableFilmCollection( BaseFilmCollection):
-    def __init__(self, input_list):
-        super().__init__(input_list)
-        self.identify_all()
-
     def full_recommendation_expansion(self):
         imdb_ids = { movie.imdb_id for movie in self.movies }
         recs = DataExtraction.Recommendations.all(imdb_ids)
@@ -66,6 +57,23 @@ class ExpandableFilmCollection( BaseFilmCollection):
 
         num_old = len( imdb_ids )
         num_new = len( recs - imdb_ids )
-        num_total = len( recs)
-        print(f"From {num_old} films, there were {num_total} recommendations, of which {num_new} are new.")
+        print(f"From {num_old} films, there were {num_new} unique recommendations")
         self.identify_all()
+
+    def multiple_adjacency_recommendation_expansion( self):
+        imdb_ids = { movie.imdb_id for movie in self.movies }
+        recs = DataExtraction.Recommendations.multiple_adjacency(imdb_ids)
+
+        for rec in recs:
+            self.add_record( rec)
+
+        num_old = len( imdb_ids )
+        num_new = len( recs - imdb_ids )
+        print(f"From {num_old} films, there were {num_new} films recommended multiple times.")
+        self.identify_all()
+
+class TaglineFilmCollection( BaseFilmCollection):
+    RECORD_TYPE = TaglineFilmRecord
+
+class DetailedFilmCollection( BaseFilmCollection):
+    RECORD_TYPE = DetailedFilmRecord
