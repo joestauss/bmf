@@ -23,7 +23,7 @@ class BaseFilmCollection():
         if isinstance(item, BaseFilmRecord):
             self.movies.add( item)
         else:
-            imdb_id, title, year = StringUtil.film_identity( item)
+            imdb_id, title, year = StringLocator.film_identity( item)
             if not imdb_id:
                 imdb_id, _ = Webscraper.IMDB.Search.by_title_and_year( title, year)
             self.movies.add( self.RECORD_TYPE( imdb_id))

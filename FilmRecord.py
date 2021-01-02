@@ -1,9 +1,9 @@
-from utility_methods import StringUtil
+from locators import StringLocator
 from webscrapers import *
 
 class BaseFilmRecord():
     def __init__(self, imdb_id):
-        self.imdb_id, self.title, self.year = StringUtil.film_identity( imdb_id)
+        self.imdb_id, self.title, self.year = StringLocator.film_identity( imdb_id)
         self.details = []
 
     def __str__(self):

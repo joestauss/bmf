@@ -3,24 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 
-class SeleniumUtil():
-    class DriverContext():
-        def __init__( self, url):
-            self.url = url
-
-        def __enter__(self):
-            self.driver = webdriver.Chrome()
-            self.driver.get(self.url)
-            return self.driver
-
-        def __exit__(self, exc_type, exc_value, exc_traceback):
-            self.driver.quit()
-
 class SoupUtil():
-    def soup_from_url( url):
-        r = requests.get(url)
-        return BeautifulSoup(r.text, 'html.parser')
-
     def search_in_soup(soup, tag_type, search_text):
         candidates = soup.find_all(tag_type)
         for c in candidates:
@@ -43,7 +26,7 @@ class SoupUtil():
                     REGULAR_FILM = False
 
             if REGULAR_FILM:
-                r_vals.append( StringUtil.film_identity( item.find('a')["href"])[0])
+                r_vals.append( StringLocator.film_identity( item.find('a')["href"])[0])
         return r_vals
 
 class SQLUtil():
@@ -122,33 +105,6 @@ class SQLUtil():
 
 
 class StringUtil():
-    def dollar_amount( s):
-        dollar_amounts = re.findall(r'\$[0-9,]+', s)
-        for d in dollar_amounts:
-            return int(d[1:].replace(',', ''))
-        return None
-
-    def minute_amount( s):
-        minute_amounts = re.findall(r'[0-9]+ min', s)
-        for m in minute_amounts:
-            return int(m[:-4])
-        return None
-
-    def person_id( s):
-        if re.search("nm\d+", s):
-            return re.findall("nm\d+", s)[0]
-        return None
-
-    def film_identity( s):
-        imdb_id, title, year = None, None, None
-        if re.search("tt\d+", s):
-            imdb_id = re.findall("tt\d+", s)[0]
-        elif re.search("\(\d\d\d\d\)$", s):
-            year, title  = int(s[-5:-1]), s[:-6].strip()
-        else:
-            title = s
-        return imdb_id, title, year
-
     def section_header( input_item):
         #   input_item can be either a string or a list of strings.
         #

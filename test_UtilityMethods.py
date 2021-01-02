@@ -1,11 +1,12 @@
 import unittest
+from locators import StringLocator
 from utility_methods import *
 from UnitTest_Resources import *
 
-class TestStringUtil( unittest.TestCase):
+class TestStringLocator( unittest.TestCase):
     def test_FilmIdentity( self):
         for input, output in TestCases.UtilityMethods.FilmIdentity:
-            self.assertEqual( StringUtil.film_identity(input), output)
+            self.assertEqual( StringLocator.film_identity(input), output)
 
 class TestSQLUtil( unittest.TestCase):
     def test_TableEquality( self):

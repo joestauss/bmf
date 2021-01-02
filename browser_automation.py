@@ -6,6 +6,7 @@ from locators import SeleniumLocator
 from threading import Thread
 from utility_methods import *
 from webscrapers import *
+import time
 
 def BatchExtraction( dataExtractionThread, inputs):
     results = {}
@@ -47,7 +48,16 @@ class IMDBExtractionThread():
 
     class Recommendations( BaseIMDBExtractionThread):
         def extract(self, imdb_id):
-            return SeleniumLocator.IMDB.recommendations( imdb_id)
+            url = f"https://www.imdb.com/title/{imdb_id}/"
+            recs = []
+            with SeleniumContext.BasicChromeDriver( url) as driver:
+                recs_temp = WebDriverWait(driver, 1).until( EC.presence_of_element_located(SeleniumLocator.IMDB.RECS_LIST))
+                recs = recs_temp.find_elements(By.CLASS_NAME, 'rec_item')
+                for rec in recs:
+                    rec_str = rec.get_attribute("data-tconst")
+                    if rec_str != imdb_id:
+                        recs.append(rec_str)
+            return recs
 
 class DataExtraction():
     class Recommendations():
@@ -67,3 +77,29 @@ class DataExtraction():
                         rec_count[ rec] = 0
                     rec_count[ rec] = rec_count[ rec] + 1
             return {rec for rec in rec_count if rec_count[ rec] > 1}
+
+
+class TwitterArtBot():
+    def __init__( self, username, password):
+        self.username = username
+        self.password = password
+        self.base_url = "https://twitter.com/"
+
+    def text_post( self, post_text):
+        with SeleniumContext.BasicChromeDriver( self.base_url) as self.driver:
+            self._login()
+            self._form_text_post( post_text)
+            time.sleep(10)
+                # I'm not ready to start posting yet.
+
+    def _form_text_post(self, post_text):
+        post_text_box = WebDriverWait(self.driver, 2).until( EC.presence_of_element_located(SeleniumLocator.Twitter.POST_TEXT_BOX))
+        post_text_box.send_keys( post_text)
+
+    def _login( self):
+        username_box = WebDriverWait(self.driver, 2).until( EC.presence_of_element_located(SeleniumLocator.Twitter.USERNAME_BOX))
+        username_box.send_keys( self.username)
+        password_box = WebDriverWait(self.driver, 2).until( EC.presence_of_element_located(SeleniumLocator.Twitter.PASSWORD_BOX))
+        password_box.send_keys( self.password)
+        login_button = WebDriverWait(self.driver, 2).until( EC.presence_of_element_located(SeleniumLocator.Twitter.LOGIN_BUTTON))
+        login_button.click()

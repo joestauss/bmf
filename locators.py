@@ -2,47 +2,19 @@ from utility_methods import *
 from bs4 import BeautifulSoup
 import random
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
 class SeleniumLocator():
+    class Twitter():
+        USERNAME_BOX = (By.NAME, "session[username_or_email]")
+        PASSWORD_BOX = (By.NAME, "session[password]")
+        LOGIN_BUTTON = (By.XPATH, "/html/body/div/div/div/div/main/div/div/div/div[1]/div[1]/div/form/div/div[3]/div")
+        POST_TEXT_BOX = (By.XPATH, "/html/body/div/div/div/div[2]/main/div/div/div/div[1]/div/div[2]/div/div[2]/div[1]/div/div/div/div[2]/div[1]/div/div/div/div/div/div/div/div/div/div[1]/div/div/div/div[2]/div")
+
     class IMDB():
-        def recommendations( imdb_id):
-            url = f"https://www.imdb.com/title/{imdb_id}/"
-            recs = []
-            with SeleniumUtil.DriverContext( url) as driver:
-                recs_div = WebDriverWait(driver, 1).until( EC.presence_of_element_located((By.ID, "titleRecs")))
-                recs_temp = recs_div.find_elements(By.CLASS_NAME, 'rec_item')
-                for rec in recs_temp:
-                    rec_str = rec.get_attribute("data-tconst")
-                    if rec_str != imdb_id:
-                        recs.append(rec_str)
-            return recs
+        RECS_LIST = (By.ID, "titleRecs")
 
 class SoupLocator():
     class IMDB():
-        class Search():
-            def films( soup):
-                r = []
-                result_categories = soup.find_all('div', class_='findSection')
-                for category in result_categories:
-                    if category.find('h3').text == 'Titles':
-                        film_results = category.find_all('td', class_='result_text')
-                        for result in film_results:
-                            _, title, year = StringUtil.film_identity( result.text.strip().split(' aka ')[0])
-                            imdb_id = result.find('a')['href'].split("/")[2]
-                            r.append( (imdb_id, title, year))
-                return r
-
-            def person( soup):
-                r = None
-                result_categories = soup.find_all('div', class_='findSection')
-                for category in result_categories:
-                    if category.find('h3').text == 'Names':
-                        name_results = category.find_all('td', class_='result_text')
-                        r = StringUtil.person_id( name_results[0].find('a')['href'])
-                return r
-
         class Person():
             def full_name( soup):
                 return soup.find('title').text.split('-')[0].strip()
@@ -57,57 +29,36 @@ class SoupLocator():
                 title_div = soup.find('div', class_='title_wrapper')
                 if title_div is None:
                     return None, None
-                _, title, year = StringUtil.film_identity( title_div.h1.text.strip())
+                _, title, year = StringLocator.film_identity( title_div.h1.text.strip())
                 return title, year
 
             def small_credits( soup):
                 credits_div = soup.find_all('div', class_='credit_summary_item')
-                directors = set()
-                try:
-                    temp_directors = credits_div[0].text.split('|')[0].split('\n')[2].split(',')
-                    for director in temp_directors:
-                        directors.add(director.split('(')[0].strip())
-                except:
-                    pass
-
-                writers = set()
-                try:
-                    temp_writers = credits_div[1].text.split('|')[0].split('\n')[2].split(',')
-                    for writer in temp_writers:
-                        writers.add(writer.split('(')[0].strip())
-                except:
-                    pass
-
-                actors = set()
-                try:
-                    temp_actors = credits_div[2].text.split('|')[0].split('\n')[2].split(',')
-                    for actor in temp_actors:
-                        dd['actors'].add(actor.split('(')[0].strip())
-                except:
-                    pass
-                return directors, writers, actors
+                roles = ['directors', 'writers', 'actors']
+                cast = {role : set()  for role in roles }
+                for i, role in enumerate( roles):
+                    try:
+                        temp = credits_div[i].text.split('|')[0].split('\n')[2].split(',')
+                        for person in temp:
+                            cast[role].add(person.split('(')[0].strip())
+                    except:
+                        pass
+                return cast['directors'], cast['writers'], cast['actors']
 
             def details( soup):
                 details_div = soup.find('div', id='titleDetails')
-                try:
-                    budget_div = SoupUtil.search_in_soup( details_div, 'div', 'Budget')
-                    budget = StringUtil.dollar_amount(budget_div.text)
-                except:
-                    budget = None
-
-                try:
-                    boxOffice_div  = SoupUtil.search_in_soup( details_div, 'div', 'Cumulative Worldwide Gross')
-                    box_office = StringUtil.dollar_amount(boxOffice_div.text)
-                except:
-                    box_office = None
-
-                try:
-                    runtime_div = SoupUtil.search_in_soup( details_div, 'div', 'Runtime')
-                    runtime = StringUtil.minute_amount( runtime_div.text)
-                except:
-                    runtime = None
-
-                return budget, box_office, runtime
+                details = [('budget', 'Budget'), ('box_office', 'Cumulative Worldwide Gross'), ('runtime', 'Runtime')]
+                dd = {key: None for (key, _) in details}
+                for key, search_term in details:
+                    try:
+                        data_div = SoupUtil.search_in_soup( details_div, 'div', search_term)
+                        if key in ['budget', 'box_office']:
+                            dd[ key] = StringLocator.dollar_amount(data_div.text)
+                        if key in ['runtime']:
+                            dd[ key] = StringLocator.minute_amount(data_div.text)
+                    except:
+                        pass
+                return dd['budget'], dd['box_office'], dd['runtime']
 
             def genres( soup):
                 genres = set()
@@ -143,3 +94,53 @@ class SoupLocator():
                         break
                     taglines.add(tagline_text)
                 return taglines
+
+        class Search():
+            def films( soup):
+                r = []
+                result_categories = soup.find_all('div', class_='findSection')
+                for category in result_categories:
+                    if category.find('h3').text == 'Titles':
+                        film_results = category.find_all('td', class_='result_text')
+                        for result in film_results:
+                            _, title, year = StringLocator.film_identity( result.text.strip().split(' aka ')[0])
+                            imdb_id = result.find('a')['href'].split("/")[2]
+                            r.append( (imdb_id, title, year))
+                return r
+
+            def person( soup):
+                r = None
+                result_categories = soup.find_all('div', class_='findSection')
+                for category in result_categories:
+                    if category.find('h3').text == 'Names':
+                        name_results = category.find_all('td', class_='result_text')
+                        r = StringLocator.person_id( name_results[0].find('a')['href'])
+                return r
+
+class StringLocator():
+    def dollar_amount( s):
+        dollar_amounts = re.findall(r'\$[0-9,]+', s)
+        for d in dollar_amounts:
+            return int(d[1:].replace(',', ''))
+        return None
+
+    def minute_amount( s):
+        minute_amounts = re.findall(r'[0-9]+ min', s)
+        for m in minute_amounts:
+            return int(m[:-4])
+        return None
+
+    def person_id( s):
+        if re.search("nm\d+", s):
+            return re.findall("nm\d+", s)[0]
+        return None
+
+    def film_identity( s):
+        imdb_id, title, year = None, None, None
+        if re.search("tt\d+", s):
+            imdb_id = re.findall("tt\d+", s)[0]
+        elif re.search("\(\d\d\d\d\)$", s):
+            year, title  = int(s[-5:-1]), s[:-6].strip()
+        else:
+            title = s
+        return imdb_id, title, year
