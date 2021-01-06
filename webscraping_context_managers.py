@@ -30,6 +30,10 @@ class SoupContext():
         def __exit__(self, exc_type, exc_value, exc_traceback):
             pass
 
+    class Search( Base):
+        def __init__(self, search_term):
+            self.url = f"https://www.imdb.com/find?q={search_term}"
+
     class Actor( Base):
         def __init__(self, actor_id):
             self.actor_id = actor_id
@@ -42,18 +46,19 @@ class SoupContext():
             self.film_id = film_id
             if not re.match("tt\d+", self.film_id):
                 raise ValueError(f"Film context called with invalid film ID {self.film_id}")
-            self.url = f'https://www.imdb.com/title/{film_id}/'
+            self.url = f'https://www.imdb.com/title/{film_id}'
 
     class Taglines( Film):
         def __init__(self, film_id):
             super().__init__(film_id)
-            self.url = self.url + "taglines/"
+            self.url = self.url + "/taglines"
 
     class CompanyCredits( Film):
         def __init__(self, film_id):
             super().__init__(film_id)
-            self.url = self.url + "companycredits/"
+            self.url = self.url + "/companycredits"
 
-    class Search( Base):
-        def __init__(self, search_term):
-            self.url = f"https://www.imdb.com/find?q={search_term}"
+    class Posters( Film):
+        def __init__(self, film_id):
+            super().__init__(film_id)
+            self.url = self.url + "/mediaindex?refine=poster"

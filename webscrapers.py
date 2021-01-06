@@ -1,9 +1,14 @@
 from utility_methods import *
 from locators import SoupLocator
 from webscraping_context_managers import *
+import urllib.request
 import re
 
 class Webscraper():
+    def image( url, target_file_location):
+        with SoupContext.Base(url) as soup:
+            urllib.request.urlretrieve(url, target_file_location)
+                
     class IMDB():
         class Film():
             def title_and_year( imdb_id):
@@ -35,6 +40,11 @@ class Webscraper():
             def production_companies( imdb_id):
                 with SoupContext.CompanyCredits( imdb_id) as soup:
                     return SoupLocator.IMDB.CompanyCredits.production_cos( soup)
+
+            def poster_urls( imdb_id):
+                with SoupContext.Posters( imdb_id) as soup:
+                    base_url = f'https://www.imdb.com'
+                    return [base_url + rel for rel in SoupLocator.IMDB.Images.poster_relative_locations( soup)]
 
         class Actor():
             def full_name( actor_id):

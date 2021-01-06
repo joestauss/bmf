@@ -114,6 +114,11 @@ class SoupLocator():
                         r = StringLocator.person_id( name_results[0].find('a')['href'])
                 return r
 
+        class Images:
+            def poster_relative_locations( soup):
+                image_thumbnails = soup.find( 'div', id='media_index_thumbnail_grid')
+                return { a['href'] for a in image_thumbnails.find_all('a') if not re.search('registration/signin',a['href'])}
+
 class StringLocator():
     def dollar_amount( s):
         dollar_amounts = re.findall(r'\$[0-9,]+', s)
