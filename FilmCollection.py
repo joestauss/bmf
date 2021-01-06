@@ -5,6 +5,7 @@ from webscrapers import *
 
 class BaseFilmCollection():
     RECORD_TYPE = BaseFilmRecord
+
     def __init__(self, input_list, VERBOSE=False):
         self.movies = set()
         for i, input_item in enumerate(input_list, 1):
@@ -74,6 +75,32 @@ class BaseFilmCollection():
 
 class TaglineFilmCollection( BaseFilmCollection):
     RECORD_TYPE = TaglineFilmRecord
+
+    def manual_tagline_selection( self):
+        def get_user_choices( input_list):
+            explanation_prompt = "Please enter the number of the tagline(s) you would like, separated by a comma."
+            print( explanation_prompt)
+
+            choices_prompt = "\n".join(
+                [f'{i}:{" "*(4-len(str(i)))}{choice}' for i, choice in enumerate( input_list)]
+                + [">>> "] )
+            user_input = input( choices_prompt)
+
+            print( f"User wants {user_input}.  This corresponds to the following taglines:")
+            selections = [s.strip() for s in user_input.split(",")]
+            valid_selections = []
+            for selection in selections:
+                try:
+                    valid_selections.append( input_list[ int(selection)])
+                    print(  "\t" + valid_selections[-1])
+                except:
+                    print( "\t" + f"{selection} was not a valid choice.")
+            return valid_selections
+
+        for film in self.movies:
+            all_taglines = Webscraper.IMDB.Film.taglines( film.imdb_id)
+            film.taglines  = get_user_choices( list(all_taglines))
+            film.details.append( f'{len(film.taglines)} taglines')
 
 class DetailedFilmCollection( BaseFilmCollection):
     RECORD_TYPE = DetailedFilmRecord
