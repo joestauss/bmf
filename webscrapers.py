@@ -18,6 +18,10 @@ class Webscraper():
                     genres = SoupLocator.IMDB.MainPage.genres(soup)
                     return ttl_yr, sm_cst, detail, genres
 
+            def taglines( imdb_id):
+                with SoupContext.Taglines(imdb_id) as soup:
+                    return SoupLocator.IMDB.taglines( soup)
+
             def two_taglines_at_random(imdb_id):
                 with SoupContext.Taglines(imdb_id) as soup:
                     NUM_TAGLINES = 2

@@ -6,7 +6,7 @@ class BaseJSONExport():
         self.movies = movie_collection.movies
         self.json = []
         for film in movies.self:
-            self.json.append( "\n".join(["{", movie_data_as_json( film), "}"]))
+            self.json.append( "\n".join(["{", json_internals_for_movie_data( film), "}"]))
 
     def json_internals_for_movie_data( self, film):
         #   By "JSON Internals", I mean everything except the leading and trailing {} brackets.
