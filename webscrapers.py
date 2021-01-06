@@ -18,9 +18,15 @@ class Webscraper():
                     genres = SoupLocator.IMDB.MainPage.genres(soup)
                     return ttl_yr, sm_cst, detail, genres
 
-            def taglines(imdb_id):
+            def two_taglines_at_random(imdb_id):
                 with SoupContext.Taglines(imdb_id) as soup:
-                    return SoupLocator.IMDB.Taglines.get_two_at_random( soup)
+                    NUM_TAGLINES = 2
+                    taglines = SoupLocator.IMDB.taglines( soup)
+                    random.shuffle( taglines)
+                    if len( taglines) < NUM_TAGLINES:
+                        return taglines
+                    else:
+                        return taglines[:NUM_TAGLINES]
 
             def production_companies( imdb_id):
                 with SoupContext.CompanyCredits( imdb_id) as soup:

@@ -72,6 +72,16 @@ class SoupLocator():
                 finally:
                     return genres
 
+        def taglines( soup):
+                taglines = set()
+                tagline_divs = soup.find_all('div', class_='soda')
+                for tagline_div in tagline_divs:
+                    tagline_text = tagline_div.text.strip()
+                    if re.search("Be the first to contribute!", tagline_text):
+                        break
+                    taglines.add(tagline_text)
+                return taglines
+
         class CompanyCredits():
             def production_cos( soup):
                 production_cos = set()
@@ -81,19 +91,6 @@ class SoupLocator():
                     prod_co_text = prod_co.a.text.strip()
                     production_cos.add(prod_co_text)
                 return production_cos
-
-        class Taglines():
-            def get_two_at_random( soup):
-                NUM_TAGLINES = 2
-                taglines = set()
-                tagline_divs = soup.find_all('div', class_='soda')
-                random.shuffle(tagline_divs)
-                for tagline_div in tagline_divs:
-                    tagline_text = tagline_div.text.strip()
-                    if len( taglines) == NUM_TAGLINES or re.search("Be the first to contribute!", tagline_text):
-                        break
-                    taglines.add(tagline_text)
-                return taglines
 
         class Search():
             def films( soup):

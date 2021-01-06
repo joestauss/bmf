@@ -29,7 +29,7 @@ class BaseFilmRecord():
 class TaglineFilmRecord( BaseFilmRecord):
     def scrape_data(self):
         super().scrape_data()
-        self.taglines = Webscraper.IMDB.Film.taglines( self.imdb_id)
+        self.taglines = Webscraper.IMDB.Film.two_taglines_at_random( self.imdb_id)
         self.details.append( f'{len(self.taglines)} taglines')
 
 class ProductionFilmRecord( BaseFilmRecord):

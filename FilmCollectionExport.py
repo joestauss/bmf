@@ -1,6 +1,29 @@
 from utility_methods import SQLUtil
 from FilmCollection import *
 
+class BaseJSONExport():
+    def __init__(self, movie_collection):
+        self.movies = movie_collection.movies
+        self.json = []
+        for film in movies.self:
+            self.json.append( "\n".join(["{", movie_data_as_json( film), "}"]))
+
+    def json_internals_for_movie_data( self, film):
+        #   By "JSON Internals", I mean everything except the leading and trailing {} brackets.
+        #   By NOT adding these in this method, the child class' implementation can call their supers' version
+        #   and then append any new data without having to worry about re-opening the record .
+        if isinstance( film, BaseFilmRecord):
+            json_lines = [ f'"imdb_id": "{film.imdb_id}"']
+            if film.title:
+                json_lines.append( f'"title": "{film.title}"')
+            if film.year:
+                json_lines.append( f'"year": "{film.year}"')
+            return ",\n".join( json_lines)
+
+    def __str__(self):
+        return "\n".join( self.json)
+
+
 class BaseSQLExport():
     def __init__(self, movie_collection):
         self.movies = movie_collection.movies
@@ -107,5 +130,11 @@ class DetailedSQLExport(TaglineSQLExport, ProductionSQLExport, GenreSQLExport, S
                 'movie_budget' : movie.budget,
                 'movie_boxoffice' : movie.box_office,
                 'movie_runtime': movie.runtime
+            })
+        else:
+            dat.update({
+                'movie_budget' : None,
+                'movie_boxoffice' : None,
+                'movie_runtime': None
             })
         return dat
