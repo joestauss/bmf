@@ -18,7 +18,7 @@ class FilmImageCollection( BaseFilmCollection):
 
     def get_poster_urls(self):
         self.poster_urls = {}
-        for film in [m.imdb_id for m in self.movies]:
+        for film in [f.film_id for f in self.films]:
             return_vals = []
             imdb_viewer_urls = Webscraper.IMDB.Film.poster_urls( film)
             for viewer_url in imdb_viewer_urls:
@@ -35,4 +35,3 @@ class FilmImageCollection( BaseFilmCollection):
                 target_filename = f'{film} Poster {i}.jpg'
                 target_file_location = os.path.join( self.images_dir, target_filename)
                 Webscraper.image(url, target_file_location)
-                

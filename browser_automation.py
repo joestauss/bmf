@@ -9,6 +9,20 @@ from webscrapers import *
 import time
 
 def BatchExtraction( dataExtractionThread, inputs):
+    ''' Multi-threaded data extraction in batches of 10.
+
+    Parameters
+    ----------
+    dataExtractionThread: Thread class
+        A thread to perform the desired data extraction a single time.
+
+    inputs: list
+        Desired inputs to dataExtractionThread.
+
+    Returns
+    -------
+    A set of all the data extractions.
+    '''
     results = {}
     threads = {}
     BATCH_SIZE = 10
@@ -33,53 +47,53 @@ def BatchExtraction( dataExtractionThread, inputs):
 
     return results
 
-class IMDBExtractionThread():
+class IMDBExtractionThread:
     class BaseIMDBExtractionThread( Thread):
-        def __init__(self, imdb_id, output_dict):
+        def __init__(self, film_id, output_dict):
             super().__init__()
-            self.imdb_id = imdb_id
+            self.film_id = film_id
             self.output_dict = output_dict
 
         def run( self):
-            self.output_dict[ self.imdb_id] =  self.extract( self.imdb_id)
+            self.output_dict[ self.film_id] =  self.extract( self.film_id)
 
-        def extract( self, imdb_id):
+        def extract( self, film_id):
             return []
 
-    class Recommendations( BaseIMDBExtractionThread):
-        def extract(self, imdb_id):
-            url = f"https://www.imdb.com/title/{imdb_id}/"
+    class RecommendationsExtractionThread( BaseIMDBExtractionThread):
+        def extract(self, film_id):
+            url = f"https://www.imdb.com/title/{film_id}/"
             recs = []
             with SeleniumContext.BasicChromeDriver( url) as driver:
                 recs_temp = WebDriverWait(driver, 1).until( EC.presence_of_element_located(SeleniumLocator.IMDB.RECS_LIST))
                 recs = recs_temp.find_elements(By.CLASS_NAME, 'rec_item')
                 for rec in recs:
                     rec_str = rec.get_attribute("data-tconst")
-                    if rec_str != imdb_id:
+                    if rec_str != film_id:
                         recs.append(rec_str)
             return recs
 
-class DataExtraction():
-    class Recommendations():
-        def all( imdb_ids):
+class ExtractData:
+    class ExtractRecommendations:
+        def all( film_ids):
             recs = set()
-            recs_dictionary = BatchExtraction( IMDBExtractionThread.Recommendations, imdb_ids)
-            for imdb_id in recs_dictionary:
-                recs = recs | {rec for rec in recs_dictionary[imdb_id]}
+            recs_dictionary = BatchExtraction( IMDBExtractionThread.RecommendationsExtractionThread, film_ids)
+            for film_id in recs_dictionary:
+                recs = recs | {rec for rec in recs_dictionary[film_id]}
             return recs
 
-        def multiple_adjacency( imdb_ids):
+        def multiple_adjacency( film_ids):
             rec_count = {}
-            recs_dictionary = BatchExtraction( IMDBExtractionThread.Recommendations, imdb_ids)
-            for imdb_id in recs_dictionary:
-                for rec in recs_dictionary[ imdb_id]:
+            recs_dictionary = BatchExtraction( IMDBExtractionThread.RecommendationsExtractionThread, film_ids)
+            for film_id in recs_dictionary:
+                for rec in recs_dictionary[ film_id]:
                     if rec not in rec_count:
                         rec_count[ rec] = 0
                     rec_count[ rec] = rec_count[ rec] + 1
             return {rec for rec in rec_count if rec_count[ rec] > 1}
 
 
-class TwitterArtBot():
+class TwitterArtBot:
     def __init__( self, username, password):
         self.username = username
         self.password = password

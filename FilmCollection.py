@@ -7,7 +7,7 @@ class BaseFilmCollection():
     RECORD_TYPE = BaseFilmRecord
 
     def __init__(self, input_list, VERBOSE=False):
-        self.movies = set()
+        self.films = set()
         for i, input_item in enumerate(input_list, 1):
             if VERBOSE:
                 print( f"Adding record {i} of {len(input_list)}:\t{input_item}")
@@ -15,61 +15,61 @@ class BaseFilmCollection():
 
     def __str__(self):
         r = [ StringUtil.section_header("Film Collection")]
-        sorted_movies = sorted( self.movies, key=lambda m:m.year if m.year else 0)
-        for item in sorted_movies:
+        sorted_films = sorted( self.films, key=lambda m:m.year if m.year else 0)
+        for item in sorted_films:
             r.append( str(item))
         return "\n".join(r)
 
     def add_record( self, item):
         if isinstance(item, BaseFilmRecord):
-            self.movies.add( item)
+            self.films.add( item)
         else:
-            imdb_id, title, year = StringLocator.film_identity( item)
-            if not imdb_id:
-                imdb_id, _ = Webscraper.IMDB.Search.by_title_and_year( title, year)
-            self.movies.add( self.RECORD_TYPE( imdb_id))
+            film_id, title, year = StringLocator.film_identity( item)
+            if not film_id:
+                film_id, _ = Webscraper.IMDB.Search.by_title_and_year( title, year)
+            self.films.add( self.RECORD_TYPE( film_id))
 
     def identify_all( self):
         threads = {}
-        for movie in self.movies:
-            threads[movie] = threading.Thread( target=movie.identify)
-            threads[movie].start()
-        for movie in self.movies:
-            threads[movie].join()
+        for film in self.films:
+            threads[film] = threading.Thread( target=film.identify)
+            threads[film].start()
+        for film in self.films:
+            threads[film].join()
 
     def scrape_all( self):
         threads = {}
         counter = 0
-        for movie in self.movies:
+        for film in self.films:
             counter = counter + 1
             print(f"Creating thread {counter}.")
-            threads[movie] = threading.Thread( target=movie.scrape_data)
-            threads[movie].start()
-        for movie in self.movies:
+            threads[film] = threading.Thread( target=film.scrape_data)
+            threads[film].start()
+        for film in self.films:
             print(f"Waiting for {counter} threads..")
-            threads[movie].join()
+            threads[film].join()
             counter = counter - 1
 
     def full_recommendation_expansion(self):
-        imdb_ids = { movie.imdb_id for movie in self.movies }
-        recs = DataExtraction.Recommendations.all(imdb_ids)
+        film_ids = { film.film_id for film in self.films }
+        recs = ExtractData.ExtractRecommendations.all(film_ids)
         for rec in recs:
             self.add_record( rec)
 
-        num_old = len( imdb_ids )
-        num_new = len( recs - imdb_ids )
+        num_old = len( film_ids )
+        num_new = len( recs - film_ids )
         print(f"From {num_old} films, there were {num_new} unique recommendations")
         self.identify_all()
 
     def multiple_adjacency_recommendation_expansion( self):
-        imdb_ids = { movie.imdb_id for movie in self.movies }
-        recs = DataExtraction.Recommendations.multiple_adjacency(imdb_ids)
+        film_ids = { film.film_id for film in self.films }
+        recs = ExtractData.ExtractRecommendations.multiple_adjacency(film_ids)
 
         for rec in recs:
             self.add_record( rec)
 
-        num_old = len( imdb_ids )
-        num_new = len( recs - imdb_ids )
+        num_old = len( film_ids )
+        num_new = len( recs - film_ids )
         print(f"From {num_old} films, there were {num_new} films recommended multiple times.")
         self.identify_all()
 
@@ -97,8 +97,8 @@ class TaglineFilmCollection( BaseFilmCollection):
                     print( "\t" + f"{selection} was not a valid choice.")
             return valid_selections
 
-        for film in self.movies:
-            all_taglines = Webscraper.IMDB.Film.taglines( film.imdb_id)
+        for film in self.films:
+            all_taglines = Webscraper.IMDB.Film.taglines( film.film_id)
             film.taglines  = get_user_choices( list(all_taglines))
             film.details.append( f'{len(film.taglines)} taglines')
 

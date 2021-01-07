@@ -3,28 +3,27 @@ from bs4 import BeautifulSoup
 import random
 from selenium.webdriver.common.by import By
 
-class SeleniumLocator():
-    class Twitter():
+class SeleniumLocator:
+    class Twitter:
         USERNAME_BOX = (By.NAME, "session[username_or_email]")
         PASSWORD_BOX = (By.NAME, "session[password]")
         LOGIN_BUTTON = (By.XPATH, "/html/body/div/div/div/div/main/div/div/div/div[1]/div[1]/div/form/div/div[3]/div")
         POST_TEXT_BOX = (By.XPATH, "/html/body/div/div/div/div[2]/main/div/div/div/div[1]/div/div[2]/div/div[2]/div[1]/div/div/div/div[2]/div[1]/div/div/div/div/div/div/div/div/div/div[1]/div/div/div/div[2]/div")
 
-    class IMDB():
+    class IMDB:
         RECS_LIST = (By.ID, "titleRecs")
 
-class SoupLocator():
-    class IMDB():
-        class Person():
+class SoupLocator:
+    class IMDB:
+        class Person:
             def full_name( soup):
                 return soup.find('title').text.split('-')[0].strip()
 
             def acting_filmography( soup):
-                actor_filmography = soup.find(class_='filmo-category-section')
-                full_acting_credits = actor_filmography.find_all(class_='filmo-row')
+                full_acting_credits = soup.find(class_='filmo-category-section').find_all(class_='filmo-row')
                 return SoupUtil.filmography_filter( full_acting_credits)
 
-        class MainPage():
+        class MainPage:
             def title_and_year( soup):
                 title_div = soup.find('div', class_='title_wrapper')
                 if title_div is None:
@@ -82,7 +81,7 @@ class SoupLocator():
                     taglines.add(tagline_text)
                 return taglines
 
-        class CompanyCredits():
+        class CompanyCredits:
             def production_cos( soup):
                 production_cos = set()
                 credits = soup.find(id='company_credits_content')
@@ -92,7 +91,7 @@ class SoupLocator():
                     production_cos.add(prod_co_text)
                 return production_cos
 
-        class Search():
+        class Search:
             def films( soup):
                 r = []
                 result_categories = soup.find_all('div', class_='findSection')
@@ -101,8 +100,8 @@ class SoupLocator():
                         film_results = category.find_all('td', class_='result_text')
                         for result in film_results:
                             _, title, year = StringLocator.film_identity( result.text.strip().split(' aka ')[0])
-                            imdb_id = result.find('a')['href'].split("/")[2]
-                            r.append( (imdb_id, title, year))
+                            film_id = result.find('a')['href'].split("/")[2]
+                            r.append( (film_id, title, year))
                 return r
 
             def person( soup):
@@ -119,7 +118,7 @@ class SoupLocator():
                 image_thumbnails = soup.find( 'div', id='media_index_thumbnail_grid')
                 return { a['href'] for a in image_thumbnails.find_all('a') if not re.search('registration/signin',a['href'])}
 
-class StringLocator():
+class StringLocator:
     def dollar_amount( s):
         dollar_amounts = re.findall(r'\$[0-9,]+', s)
         for d in dollar_amounts:
@@ -138,11 +137,11 @@ class StringLocator():
         return None
 
     def film_identity( s):
-        imdb_id, title, year = None, None, None
+        film_id, title, year = None, None, None
         if re.search("tt\d+", s):
-            imdb_id = re.findall("tt\d+", s)[0]
+            film_id = re.findall("tt\d+", s)[0]
         elif re.search("\(\d\d\d\d\)$", s):
             year, title  = int(s[-5:-1]), s[:-6].strip()
         else:
             title = s
-        return imdb_id, title, year
+        return film_id, title, year

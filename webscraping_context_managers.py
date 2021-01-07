@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from webscrapers import *
 
-class SeleniumContext():
+class SeleniumContext:
     class BasicChromeDriver():
         def __init__( self, url):
             self.url = url
@@ -34,12 +34,12 @@ class SoupContext():
         def __init__(self, search_term):
             self.url = f"https://www.imdb.com/find?q={search_term}"
 
-    class Actor( Base):
-        def __init__(self, actor_id):
-            self.actor_id = actor_id
-            if not re.match("nm\d+", self.actor_id):
-                raise ValueError(f"Actor context called invalid actor ID: {self.actor_id}")
-            self.url = f'https://www.imdb.com/name/{actor_id}/'
+    class Person( Base):
+        def __init__(self, person_id):
+            self.person_id = person_id
+            if not re.match("nm\d+", self.person_id):
+                raise ValueError(f"person context called invalid person ID: {self.person_id}")
+            self.url = f'https://www.imdb.com/name/{person_id}/'
 
     class Film( Base):
         def __init__(self, film_id):

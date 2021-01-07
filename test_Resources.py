@@ -1,5 +1,5 @@
 
-class ActorID():
+class PersonID():
     vincent_price = 'nm0001637'
     bruce_willis  = 'nm0000246'
     renee_zellweger = 'nm0000250'
@@ -12,13 +12,13 @@ class TestCases():
             ('I am the muffin man.', (None, 'I am the muffin man.', None)), # neither of the above, assumed to be a title.
             ('Deltron(3030)', (None, 'Deltron', 3030)), # No space, should still work.
             ('Beastmaster 2000 (1982)', (None, 'Beastmaster 2000', 1982)), # something like this started this whole fix
-            ('/embedded/link/tt234/j/', ('tt234', None, None)) # this should locate the imdb_id
+            ('/embedded/link/tt234/j/', ('tt234', None, None)) # this should locate the film_id
         ]
 
     class Webscrapers():
         filmography_search = [
-            (ActorID.vincent_price, ['tt0099487', 'tt0045888', 'tt0081178'] ), # Ed S'hands, house of wax, monster club
-            (ActorID.bruce_willis,  ['tt0095016']) # Die Hard
+            (PersonID.vincent_price, ['tt0099487', 'tt0045888', 'tt0081178'] ), # Ed S'hands, house of wax, monster club
+            (PersonID.bruce_willis,  ['tt0095016']) # Die Hard
         ]
         validated_films = [
             ('tt0087892', "A Passage to India", 1984),
@@ -26,9 +26,9 @@ class TestCases():
             ('tt0397065', "House of Wax", 2005)
         ]
 
-        validated_actor_ids = [
-            (ActorID.bruce_willis, "Bruce Willis"),
-            (ActorID.vincent_price, "Vincent Price")
+        validated_person_ids = [
+            (PersonID.bruce_willis, "Bruce Willis"),
+            (PersonID.vincent_price, "Vincent Price")
         ]
 
 

@@ -6,29 +6,43 @@ import re
 
 class Webscraper():
     def image( url, target_file_location):
+        ''' Downloads an image.
+
+        Parameters
+        ----------
+        url: string
+          URL to the image to be downloaded.
+
+        target_file_location: os.path
+            The loation where the file will be written to.  It overwrites whatever is at that location.
+
+        Returns
+        -------
+        Nothing.
+        '''
         with SoupContext.Base(url) as soup:
             urllib.request.urlretrieve(url, target_file_location)
-                
+
     class IMDB():
         class Film():
-            def title_and_year( imdb_id):
-                with SoupContext.Film(imdb_id) as soup:
+            def title_and_year( film_id):
+                with SoupContext.Film(film_id) as soup:
                     return SoupLocator.IMDB.MainPage.title_and_year( soup)
 
-            def main_page( imdb_id):
-                with SoupContext.Film(imdb_id) as soup:
+            def main_page( film_id):
+                with SoupContext.Film(film_id) as soup:
                     ttl_yr = SoupLocator.IMDB.MainPage.title_and_year( soup)
                     sm_cst = SoupLocator.IMDB.MainPage.small_credits( soup)
                     detail = SoupLocator.IMDB.MainPage.details(soup)
                     genres = SoupLocator.IMDB.MainPage.genres(soup)
                     return ttl_yr, sm_cst, detail, genres
 
-            def taglines( imdb_id):
-                with SoupContext.Taglines(imdb_id) as soup:
+            def taglines( film_id):
+                with SoupContext.Taglines(film_id) as soup:
                     return SoupLocator.IMDB.taglines( soup)
 
-            def two_taglines_at_random(imdb_id):
-                with SoupContext.Taglines(imdb_id) as soup:
+            def two_taglines_at_random(film_id):
+                with SoupContext.Taglines(film_id) as soup:
                     NUM_TAGLINES = 2
                     taglines = SoupLocator.IMDB.taglines( soup)
                     random.shuffle( taglines)
@@ -37,22 +51,22 @@ class Webscraper():
                     else:
                         return taglines[:NUM_TAGLINES]
 
-            def production_companies( imdb_id):
-                with SoupContext.CompanyCredits( imdb_id) as soup:
+            def production_companies( film_id):
+                with SoupContext.CompanyCredits( film_id) as soup:
                     return SoupLocator.IMDB.CompanyCredits.production_cos( soup)
 
-            def poster_urls( imdb_id):
-                with SoupContext.Posters( imdb_id) as soup:
+            def poster_urls( film_id):
+                with SoupContext.Posters( film_id) as soup:
                     base_url = f'https://www.imdb.com'
                     return [base_url + rel for rel in SoupLocator.IMDB.Images.poster_relative_locations( soup)]
 
-        class Actor():
-            def full_name( actor_id):
-                with SoupContext.Actor( actor_id) as soup:
+        class Person:
+            def full_name( person_id):
+                with SoupContext.Person( person_id) as soup:
                     return SoupLocator.IMDB.Person.full_name( soup)
 
-            def acting_filmography( actor_id):
-                with SoupContext.Actor( actor_id) as soup:
+            def acting_filmography( person_id):
+                with SoupContext.Person( person_id) as soup:
                     return SoupLocator.IMDB.Person.acting_filmography( soup)
 
         class Search():
@@ -61,8 +75,8 @@ class Webscraper():
             #
             #   The "Search for" methods just call other methods in this module, but I'm experimenting with front-ends.
             #
-            def for_title_and_year( imdb_id):
-                return Webscraper.IMDB.Film.title_and_year( imdb_id)
+            def for_title_and_year( film_id):
+                return Webscraper.IMDB.Film.title_and_year( film_id)
 
             def by_title_and_year( search_title, search_year):
                 with SoupContext.Search( search_title) as soup:
@@ -77,7 +91,7 @@ class Webscraper():
                         return min( year_offsets, key=year_offsets.get)
 
             def for_person_name( person_id):
-                return Webscraper.IMDB.Actor.full_name( person_id)
+                return Webscraper.IMDB.Person.full_name( person_id)
 
             def by_person_name( person_name):
                 with SoupContext.Search( person_name) as soup:

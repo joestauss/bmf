@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 
-class SoupUtil():
+class SoupUtil:
     def search_in_soup(soup, tag_type, search_text):
         candidates = soup.find_all(tag_type)
         for c in candidates:
@@ -29,7 +29,7 @@ class SoupUtil():
                 r_vals.append( StringLocator.film_identity( item.find('a')["href"])[0])
         return r_vals
 
-class SQLUtil():
+class SQLUtil:
     class Table():
         def __init__( self, rows):
             self.rows = rows
@@ -104,7 +104,7 @@ class SQLUtil():
 
 
 
-class StringUtil():
+class StringUtil:
     def section_header( input_item):
         #   input_item can be either a string or a list of strings.
         #
