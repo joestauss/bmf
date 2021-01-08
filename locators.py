@@ -1,6 +1,7 @@
-from utility_methods import *
+from utility_methods import SoupUtil
 from bs4 import BeautifulSoup
 import random
+import re
 from selenium.webdriver.common.by import By
 
 class SeleniumLocator:
@@ -20,8 +21,23 @@ class SoupLocator:
                 return soup.find('title').text.split('-')[0].strip()
 
             def acting_filmography( soup):
+                def filmography_filter( full_filmography):
+                    r_vals = []
+                    illegal_patterns = [
+                        "(Video Game)", "(TV Series)", "uncredited", "(TV Movie)",
+                        "(Video short)", "(Video)", "(TV Special)", "(Short)", "(scenes deleted)",
+                        "(TV Mini-Series)", "(Documentary)", "(Concert Feature)", "(voice)"
+                    ]
+                    for item in full_filmography:
+                        REGULAR_FILM = True
+                        for illegal_pattern in illegal_patterns:
+                            if re.search(illegal_pattern, item.text) :
+                                REGULAR_FILM = False
+                        if REGULAR_FILM:
+                            r_vals.append( StringLocator.film_identity( item.find('a')["href"])[0])
+                    return r_vals
                 full_acting_credits = soup.find(class_='filmo-category-section').find_all(class_='filmo-row')
-                return SoupUtil.filmography_filter( full_acting_credits)
+                return filmography_filter( full_acting_credits)
 
         class MainPage:
             def title_and_year( soup):
@@ -29,7 +45,7 @@ class SoupLocator:
                 if title_div is None:
                     return None, None
                 _, title, year = StringLocator.film_identity( title_div.h1.text.strip())
-                return title, year
+                return {'title': title, "year": year}
 
             def small_credits( soup):
                 credits_div = soup.find_all('div', class_='credit_summary_item')
@@ -42,7 +58,7 @@ class SoupLocator:
                             cast[role].add(person.split('(')[0].strip())
                     except:
                         pass
-                return cast['directors'], cast['writers'], cast['actors']
+                return cast
 
             def details( soup):
                 details_div = soup.find('div', id='titleDetails')
@@ -57,7 +73,7 @@ class SoupLocator:
                             dd[ key] = StringLocator.minute_amount(data_div.text)
                     except:
                         pass
-                return dd['budget'], dd['box_office'], dd['runtime']
+                return dd
 
             def genres( soup):
                 genres = set()

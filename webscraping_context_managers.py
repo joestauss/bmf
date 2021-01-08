@@ -24,8 +24,11 @@ class SoupContext():
 
         def __enter__(self):
             response       = requests.get( self.url)
-            self.base_soup = BeautifulSoup( response.text, 'html.parser')
-            return self.base_soup
+            if response.status_code == requests.codes.ok:
+                self.base_soup = BeautifulSoup( response.text, 'html.parser')
+                return self.base_soup
+            else:
+                response.raise_for_status() # raises an error
 
         def __exit__(self, exc_type, exc_value, exc_traceback):
             pass

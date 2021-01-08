@@ -66,12 +66,3 @@ class TestCases:
             (PersonID.bruce_willis, "Bruce Willis"),
             (PersonID.vincent_price, "Vincent Price")
         ]
-
-
-class TestSet:
-    class MixedFormat:
-        tiny   = {'tt0042376', 'Tommy Boy (1995)'}
-        medium = {'tt0042376', 'Tommy Boy (1995)', 'The Matrix (1984)', 'The Ice Pirates', 'beep boop im not a real movie', 'tt4'}
-
-    one_unreleased = {'tt8820258', 'tt0859635', 'tt0247745'}
-    # super troopers 1-3. the third has not been released yet (it miiiight be out sometime in 2021).

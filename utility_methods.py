@@ -12,23 +12,6 @@ class SoupUtil:
                 return c
         return None
 
-    def filmography_filter( full_filmography):
-        r_vals = []
-        illegal_patterns = [
-            "(Video Game)", "(TV Series)", "uncredited", "(TV Movie)",
-            "(Video short)", "(Video)", "(TV Special)", "(Short)", "(scenes deleted)",
-            "(TV Mini-Series)", "(Documentary)", "(Concert Feature)", "(voice)"
-        ]
-        for item in full_filmography:
-            REGULAR_FILM = True
-            for illegal_pattern in illegal_patterns:
-                if re.search(illegal_pattern, item.text) :
-                    REGULAR_FILM = False
-
-            if REGULAR_FILM:
-                r_vals.append( StringLocator.film_identity( item.find('a')["href"])[0])
-        return r_vals
-
 class ExportUtil:
     class Table():
         def __init__( self, rows):
@@ -104,8 +87,6 @@ class ExportUtil:
 
     def text_field_s(s):
         return ExportUtil._text_field(s, 45)
-
-
 
 class PrintUtil:
     def section_header( input_item):

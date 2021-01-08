@@ -13,13 +13,14 @@ class JSONExport:
             #   By "JSON Internals", I mean everything except the leading and trailing {} brackets.
             #   By NOT adding these in this method, the child class' implementation can call their supers' version
             #   and then append any new data without having to worry about re-opening the record .
-            if isinstance( film, BaseFilmRecord):
-                json_lines = [ f'"film_id": "{film.film_id}"']
-                if film.title:
-                    json_lines.append( f'"title": "{film.title}"')
-                if film.year:
-                    json_lines.append( f'"year": "{film.year}"')
-                return ",\n".join( json_lines)
+            json_lines = [ f'"film_id": "{film.film_id}"']
+            if 'title' in film.metadata:
+                title = film.metadata['title']
+                json_lines.append( f'"title": "{title}"')
+            if 'year' in film.metadata:
+                year = film.metadata['year']
+                json_lines.append( f'"year": "{year}"')
+            return ",\n".join( json_lines)
 
         def __str__(self):
             return "\n".join( self.json)
@@ -40,12 +41,12 @@ class SQLExport:
 
         @property
         def unprocessed_film_data(self):
-            return [ self.film_data_as_row( film) for film in self.films if isinstance(film, BaseFilmRecord)]
+            return [ self.film_data_as_row( film) for film in self.films]
 
         def film_data_as_row(self, film):
             return { 'film_id'    : film.film_id,
-                     'film_title' : film.title,
-                     'film_year'  : film.year }
+                     'film_title' : film.metadata['title'],
+                     'film_year'  : film.metadata['year'] }
 
     class TaglineSQLExport( BaseSQLExport):
         def initialize_tables( self):
@@ -58,11 +59,11 @@ class SQLExport:
         def unprocessed_tagline_data( self):
             dat = []
             for film in self.films:
-                if isinstance(film, TaglineFilmRecord):
+                if FilmRecord.TAGLINES_FLAG in film.metadata_flags:
                     dat = dat + [{
                         'film_id'   : film.film_id,
                         'tagline_text': ExportUtil.text_field_m( tagline)}
-                    for tagline in film.taglines ]
+                    for tagline in film.metadata['taglines'] ]
             return dat
 
     class ProductionSQLExport( BaseSQLExport):
@@ -76,11 +77,11 @@ class SQLExport:
         def unprocessed_production_data( self):
             dat = []
             for film in self.films:
-                if isinstance(film, ProductionFilmRecord):
+                if FilmRecord.PROD_COS_FLAG in film.metadata_flags:
                     dat = dat + [{
                         'film_id'   : film.film_id,
                         'production_name': ExportUtil.text_field_s( prod_co)}
-                    for prod_co in film.production_cos ]
+                    for prod_co in film.metadata['production companies'] ]
             return dat
 
     class GenreSQLExport( BaseSQLExport):
@@ -94,11 +95,11 @@ class SQLExport:
         def unprocessed_genre_data( self):
             dat = []
             for film in self.films:
-                if isinstance(film, DetailedFilmRecord):
+                if FilmRecord.DETAILED_FLAG in film.metadata_flags:
                     dat = dat + [{
                         'film_id'   : film.film_id,
                         'genre_name': ExportUtil.text_field_s( genre)}
-                    for genre in film.genres ]
+                    for genre in film.metadata['genres'] ]
             return dat
 
     class SmallCastSQLExport( BaseSQLExport):
@@ -114,23 +115,23 @@ class SQLExport:
         def unprocessed_small_cast_data( self):
             dat = []
             for film in self.films:
-                if isinstance(film, DetailedFilmRecord):
-                    for person in film.directors:
+                if FilmRecord.DETAILED_FLAG in film.metadata_flags:
+                    for person in film.metadata['directors']:
                         dat.append( {'film_id': film.film_id, 'person_name': ExportUtil.text_field_s(person), 'role_code':0})
-                    for person in film.writers:
+                    for person in film.metadata['writers']:
                         dat.append( {'film_id': film.film_id, 'person_name': ExportUtil.text_field_s(person), 'role_code':1})
-                    for person in film.actors:
+                    for person in film.metadata['actors']:
                         dat.append({'film_id': film.film_id, 'person_name': ExportUtil.text_field_s(person), 'role_code':2})
             return dat
 
     class DetailedSQLExport(TaglineSQLExport, ProductionSQLExport, GenreSQLExport, SmallCastSQLExport):
         def film_data_as_row(self, film):
             dat = super().film_data_as_row(film)
-            if isinstance(film, DetailedFilmRecord):
+            if FilmRecord.DETAILED_FLAG in film.metadata_flags:
                 dat.update({
-                    'film_budget' : film.budget,
-                    'film_boxoffice' : film.box_office,
-                    'film_runtime': film.runtime
+                    'film_budget'    : film.metadata['budget'],
+                    'film_boxoffice' : film.metadata['box_office'],
+                    'film_runtime'   : film.metadata['runtime']
                 })
             else:
                 dat.update({

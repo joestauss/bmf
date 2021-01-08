@@ -68,7 +68,10 @@ class IMDBExtractionThread:
                 recs_temp = WebDriverWait(driver, 1).until( EC.presence_of_element_located(SeleniumLocator.IMDB.RECS_LIST))
                 recs = recs_temp.find_elements(By.CLASS_NAME, 'rec_item')
                 for rec in recs:
-                    rec_str = rec.get_attribute("data-tconst")
+                    if isinstance( rec, str):
+                        rec_str = rec
+                    else:
+                        rec_str = rec.get_attribute("data-tconst")
                     if rec_str != film_id:
                         recs.append(rec_str)
             return recs
