@@ -1,4 +1,4 @@
-from utility_methods import SQLUtil
+from utility_methods import ExportUtil
 from FilmCollection import *
 
 class JSONExport:
@@ -35,7 +35,7 @@ class SQLExport:
 
         def initialize_tables( self):
             self.tables = {}
-            self.tables['Movie'] = SQLUtil.Table( self.unprocessed_film_data)
+            self.tables['Movie'] = ExportUtil.Table( self.unprocessed_film_data)
             self.load_order = ['Movie']
 
         @property
@@ -50,7 +50,7 @@ class SQLExport:
     class TaglineSQLExport( BaseSQLExport):
         def initialize_tables( self):
             super().initialize_tables()
-            self.tables['Tagline'] = SQLUtil.Table( self.unprocessed_tagline_data)
+            self.tables['Tagline'] = ExportUtil.Table( self.unprocessed_tagline_data)
             self.tables['Tagline'].AddPrimaryKey( 'tagline_id')
             self.load_order = self.load_order + ['Tagline']
 
@@ -61,14 +61,14 @@ class SQLExport:
                 if isinstance(film, TaglineFilmRecord):
                     dat = dat + [{
                         'film_id'   : film.film_id,
-                        'tagline_text': SQLUtil.text_field_m( tagline)}
+                        'tagline_text': ExportUtil.text_field_m( tagline)}
                     for tagline in film.taglines ]
             return dat
 
     class ProductionSQLExport( BaseSQLExport):
         def initialize_tables( self):
             super().initialize_tables()
-            self.tables['MovieProduction'] = SQLUtil.Table( self.unprocessed_production_data)
+            self.tables['MovieProduction'] = ExportUtil.Table( self.unprocessed_production_data)
             self.tables['Production'] = self.tables['MovieProduction'].NormalizeColumn( 'production_name', 'production_id')
             self.load_order = self.load_order +  ['Production', 'MovieProduction']
 
@@ -79,14 +79,14 @@ class SQLExport:
                 if isinstance(film, ProductionFilmRecord):
                     dat = dat + [{
                         'film_id'   : film.film_id,
-                        'production_name': SQLUtil.text_field_s( prod_co)}
+                        'production_name': ExportUtil.text_field_s( prod_co)}
                     for prod_co in film.production_cos ]
             return dat
 
     class GenreSQLExport( BaseSQLExport):
         def initialize_tables( self):
             super().initialize_tables()
-            self.tables['MovieGenre'] = SQLUtil.Table( self.unprocessed_genre_data)
+            self.tables['MovieGenre'] = ExportUtil.Table( self.unprocessed_genre_data)
             self.tables['Genre'] = self.tables['MovieGenre'].NormalizeColumn( 'genre_name', 'genre_id')
             self.load_order = self.load_order +  ['Genre', 'MovieGenre']
 
@@ -97,16 +97,16 @@ class SQLExport:
                 if isinstance(film, DetailedFilmRecord):
                     dat = dat + [{
                         'film_id'   : film.film_id,
-                        'genre_name': SQLUtil.text_field_s( genre)}
+                        'genre_name': ExportUtil.text_field_s( genre)}
                     for genre in film.genres ]
             return dat
 
     class SmallCastSQLExport( BaseSQLExport):
         def initialize_tables( self):
             super().initialize_tables()
-            self.tables['RoleCode'] = SQLUtil.Table( [ {'role_name' : role } for role in ['Director', 'Writer', 'Actor'] ])
+            self.tables['RoleCode'] = ExportUtil.Table( [ {'role_name' : role } for role in ['Director', 'Writer', 'Actor'] ])
             self.tables['RoleCode'].AddPrimaryKey('role_code')
-            self.tables['Role'] = SQLUtil.Table( self.unprocessed_small_cast_data)
+            self.tables['Role'] = ExportUtil.Table( self.unprocessed_small_cast_data)
             self.tables['Person'] = self.tables['Role'].NormalizeColumn( 'person_name', 'person_id')
             self.load_order = self.load_order + ['Person', 'RoleCode', 'Role']
 
@@ -116,11 +116,11 @@ class SQLExport:
             for film in self.films:
                 if isinstance(film, DetailedFilmRecord):
                     for person in film.directors:
-                        dat.append( {'film_id': film.film_id, 'person_name': SQLUtil.text_field_s(person), 'role_code':0})
+                        dat.append( {'film_id': film.film_id, 'person_name': ExportUtil.text_field_s(person), 'role_code':0})
                     for person in film.writers:
-                        dat.append( {'film_id': film.film_id, 'person_name': SQLUtil.text_field_s(person), 'role_code':1})
+                        dat.append( {'film_id': film.film_id, 'person_name': ExportUtil.text_field_s(person), 'role_code':1})
                     for person in film.actors:
-                        dat.append({'film_id': film.film_id, 'person_name': SQLUtil.text_field_s(person), 'role_code':2})
+                        dat.append({'film_id': film.film_id, 'person_name': ExportUtil.text_field_s(person), 'role_code':2})
             return dat
 
     class DetailedSQLExport(TaglineSQLExport, ProductionSQLExport, GenreSQLExport, SmallCastSQLExport):

@@ -14,7 +14,7 @@ class BaseFilmCollection():
             self.add_record( input_item)
 
     def __str__(self):
-        r = [ StringUtil.section_header("Film Collection")]
+        r = [ PrintUtil.section_header("Film Collection")]
         sorted_films = sorted( self.films, key=lambda m:m.year if m.year else 0)
         for item in sorted_films:
             r.append( str(item))

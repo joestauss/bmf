@@ -51,7 +51,7 @@ Methods
 '''
 ```
 
-Child class should explain any new attributes or methods, but can otherwise leave it at:
+Child classes should explain any new attributes or methods, but can otherwise leave it at:
 ```python
 '''See ParentClass documentation.
 

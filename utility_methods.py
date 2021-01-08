@@ -29,7 +29,7 @@ class SoupUtil:
                 r_vals.append( StringLocator.film_identity( item.find('a')["href"])[0])
         return r_vals
 
-class SQLUtil:
+class ExportUtil:
     class Table():
         def __init__( self, rows):
             self.rows = rows
@@ -48,7 +48,10 @@ class SQLUtil:
             return False
 
         def InsertAllInto( self, target_table):
-            return "\n".join(  [SQLUtil.insert_from_dd( target_table, row) for row in self.rows])
+            return "\n".join(  [ExportUtil.insert_from_dd( target_table, row) for row in self.rows])
+
+        def __str__(self):
+            return "\n".join( [str(row) for row in self.rows])
 
         def AddPrimaryKey( self, primary_key_name):
             counter = 0
@@ -70,7 +73,7 @@ class SQLUtil:
                 row[ connecting_column] = lookup[ row[ normalization_column]]
                 row.pop( normalization_column)
 
-            return SQLUtil.Table( terminal_table)
+            return ExportUtil.Table( terminal_table)
 
     def insert_from_dd( table_name, dd):
         return_string = f'INSERT INTO {table_name}'
@@ -94,17 +97,17 @@ class SQLUtil:
         return t
 
     def text_field_l(s):
-        return SQLUtil._text_field(s, 400)
+        return ExportUtil._text_field(s, 400)
 
     def text_field_m(s):
-        return SQLUtil._text_field(s, 200)
+        return ExportUtil._text_field(s, 200)
 
     def text_field_s(s):
-        return SQLUtil._text_field(s, 45)
+        return ExportUtil._text_field(s, 45)
 
 
 
-class StringUtil:
+class PrintUtil:
     def section_header( input_item):
         #   input_item can be either a string or a list of strings.
         #

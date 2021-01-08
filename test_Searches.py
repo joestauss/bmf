@@ -1,4 +1,4 @@
-from UnitTest_Resources import *
+from test_Resources import *
 from webscrapers import *
 import unittest
 
