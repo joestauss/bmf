@@ -15,7 +15,11 @@ class FilmRecord():
 
     Data Variables
     --------------
-    Under actively development.  Soon just one data dictionary.
+    metadata: dict
+        Contains information about the film.
+
+    poster_urls: list
+        Contains URLS to online resources for movie posters.
 
     Class Variables
     ---------------
@@ -29,8 +33,8 @@ class FilmRecord():
     FilmRecord.data_extraction : dict
         The data_extraction dictionary maps each metadata flag to tbe corresponding data extraction method.
 
-    Methods
-    -------
+    Basic Methods
+    -------------
         __init__
         __eq__ and __hash__ - based on film_id.
         __str__
@@ -84,22 +88,28 @@ class FilmRecord():
     ''' Data extraction methods must be defined before being used in the data_extraction dictionary definition below. '''
 
     def load_metadata(self):
+        '''Loads all metadata that metadata_flags indicates is necessary.'''
         for metadata_flag in self.metadata_flags:
             self.data_extraction[ metadata_flag]( self)
 
     def identify(self):
+        '''Adds a film's title and year to the metadata dictionary.'''
         self.metadata.update( Webscraper.IMDB_Film.title_and_year( self.film_id))
 
     def load_details( self):
+        '''Adds to the metadata dictionary the film's identity, genre(s), budget, box office ticket sales, runtime, and partial cast.'''
         self.metadata.update( Webscraper.IMDB_Film.main_page( self.film_id) )
 
     def load_poster_urls(self):
+        '''Gets the URLs for movie posters.  The results are NOT stored in the metadata dictionary.'''
         self.poster_urls = Webscraper.IMDB_Film.poster_urls( self.film_id)
 
     def load_production_companies(self):
+        '''Adds production companies to the metadata dictionary.'''
         self.metadata.update( {'production companies' : Webscraper.IMDB_Film.production_companies( self.film_id)})
 
     def load_taglines(self):
+        '''Adds taglines to the metadata dictionary.'''
         self.metadata.update( {'taglines': Webscraper.IMDB_Film.two_taglines_at_random( self.film_id)})
 
     IDENTITY_FLAG = "identity"

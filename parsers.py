@@ -18,25 +18,15 @@ class Parser:
         -------
         An ExportUtil.Table containing the same data as test_string.
         '''
-        CELL_ENTRY     = pp.OneOrMore(pp.Word(pp.alphanums, pp.alphanums+'_'))
-        INTEGER_ENTRY  = pp.Word(pp.nums)
-        WORD_ENTRY     = pp.Word(pp.alphas)
-        ROW_GRAMMAR    = pp.delimitedList(CELL_ENTRY, delim='|')
 
-        state   = "HEADER"
-        data    = []
-        columns = []
-        for line in table_string.split('\n'):
-            search_result =  ROW_GRAMMAR.searchString(line)
-            if search_result:
-                row = search_result[0]
-                if state == "HEADER":
-                    columns = row
-                    state = "BODY"
-                else:
-                    for i in range(len(row)):
-                        if INTEGER_ENTRY.searchString( row[i]) and not WORD_ENTRY.searchString(row[i]):
-                            row[i] = int(row[i])
-                    data.append( row)
-
-        return ExportUtil.Table([ {col_name: dat[i] for i, col_name in enumerate(columns)} for dat in data ])
+        INTEGER = pp.Word(pp.nums).setParseAction(lambda x: int(x[0]))
+        STRING  = pp.OneOrMore(pp.Word(pp.alphanums, pp.alphanums+'_'))
+        CELL    = INTEGER | STRING
+        ROW  = pp.Suppress("|") + pp.delimitedList(CELL, delim='|').setParseAction(lambda x: [x]) + pp.Suppress("|")
+        ROW_LINE = ROW + pp.Suppress(pp.LineEnd())
+        TABLE   = ROW_LINE.setResultsName("header") + pp.OneOrMore(ROW_LINE).setResultsName("data") + pp.StringEnd()
+        
+        search_result = TABLE.parseString( table_string)
+        header = search_result.header[0]
+        data   = search_result.data
+        return ExportUtil.Table( [{header[i]: row[i] for i in range( len( header))} for row in data])

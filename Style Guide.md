@@ -18,9 +18,13 @@ class SQLExport:
 ```
 The following modules are exempt from this guideline, on account of impending refactor: FilmCollection, FilmRecord, ImageCollection, webscrapers, webscraping_context_managers.  This also does not apply to classes that are only used to encapsulate functions, such as SoupLocator.IMDB.Search.
 
+# VERBOSE
+
+Some methods have an optional VERBOSE flag that can set to see a tqdm progress bar.  It is set at the FilmCollection level, and is probably a good idea for large FilmCollections (there are HTTP requests involved for each film, and not much to be done about speeding them up). 
+
 # Commenting Templates
 
-Very simple methods don't need to be commented, but each reasonably complex method should have the following:
+Most methods can get away with a one-line docstring, but each reasonably complex method should have the following:
 
 ```python
 ''' Summary.
