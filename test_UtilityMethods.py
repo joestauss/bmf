@@ -10,21 +10,17 @@ class TestStringLocator( unittest.TestCase):
 
 class TestExportUtil( unittest.TestCase):
     def test_TableEquality( self):
-        table1 = ExportUtil.Table([
-            {'col1' : 'a', 'col2' : 'A'},
-            {'col1' : 'b', 'col2' : 'B'}])
-        table2 = ExportUtil.Table([
-            {'col1' : 'a', 'col2' : 'A'},
-            {'col1' : 'b', 'col2' : 'B'}])
-        self.assertEqual(table1, table2)
+        for table1_str, table2_str in TestCases.TableClass.same_tables:
+            table1 = Parser.table_parser( table1_str)
+            table2 = Parser.table_parser( table2_str)
+            self.assertEqual(table1, table2)
 
     def test_Normalization( self):
         for known_case in TestCases.TableClass.validated_normalizations:
-            base_table = known_case['base_table']
+            base_table = Parser.table_parser(known_case['base_table'])
             terminal_table = base_table.NormalizeColumn('col2', 'col3')
-            self.assertEqual( terminal_table, known_case['expected_terminal_table'])
-            self.assertEqual( base_table, known_case['expected_connecting_table'])
-
+            self.assertEqual( terminal_table, Parser.table_parser(known_case['expected_terminal_table']))
+            self.assertEqual( base_table, Parser.table_parser(known_case['expected_connecting_table']))
 
 if __name__ == '__main__':
     unittest.main()
