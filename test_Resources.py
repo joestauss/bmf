@@ -6,6 +6,16 @@ class PersonID:
     renee_zellweger = 'nm0000250'
 
 class TestCases:
+    class FilmParser:
+        validated_identities = [
+            ('tt2347386', ('tt2347386', None, None)), # a valid imdb id
+            ('Terminator (1492)', ( None, 'Terminator', 1492)), # a valid film-and-date.
+            ('I am the muffin man', (None, 'I am the muffin man', None)), # neither of the above, assumed to be a title.
+            ('Deltron(3030)', (None, 'Deltron', 3030)), # No space, should still work.
+            ('Beastmaster 2000 (1982)', (None, 'Beastmaster 2000', 1982)), # something like this started this whole fix
+            ('/embedded/link/tt234/j/', ('tt234', None, None)) # this should locate the film_id
+        ]
+
     class TableParser:
         validated_correct = [(
         '''
@@ -46,16 +56,6 @@ class TestCases:
         | Blah  | Blah  | Blah  |
         '''
         )]
-
-    class UtilityMethods:
-        FilmIdentity = [
-            ('tt2347386', ('tt2347386', None, None)), # a valid imdb id
-            ('Terminator (1492)', ( None, 'Terminator', 1492)), # a valid film-and-date.
-            ('I am the muffin man.', (None, 'I am the muffin man.', None)), # neither of the above, assumed to be a title.
-            ('Deltron(3030)', (None, 'Deltron', 3030)), # No space, should still work.
-            ('Beastmaster 2000 (1982)', (None, 'Beastmaster 2000', 1982)), # something like this started this whole fix
-            ('/embedded/link/tt234/j/', ('tt234', None, None)) # this should locate the film_id
-        ]
 
     class Webscrapers():
         filmography_search = [

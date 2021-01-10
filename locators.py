@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import random
 import re
 from selenium.webdriver.common.by import By
+from parsers import FilmParser
 
 class SeleniumLocator:
     class Twitter:
@@ -34,7 +35,7 @@ class SoupLocator:
                             if re.search(illegal_pattern, item.text) :
                                 REGULAR_FILM = False
                         if REGULAR_FILM:
-                            r_vals.append( StringLocator.film_identity( item.find('a')["href"])[0])
+                            r_vals.append( FilmParser.identify( item.find('a')["href"])[0])
                     return r_vals
                 full_acting_credits = soup.find(class_='filmo-category-section').find_all(class_='filmo-row')
                 return filmography_filter( full_acting_credits)
@@ -44,7 +45,7 @@ class SoupLocator:
                 title_div = soup.find('div', class_='title_wrapper')
                 if title_div is None:
                     return None, None
-                _, title, year = StringLocator.film_identity( title_div.h1.text.strip())
+                _, title, year = FilmParser.identify( title_div.h1.text.strip())
                 return {'title': title, "year": year}
 
             def small_credits( soup):
@@ -115,7 +116,7 @@ class SoupLocator:
                     if category.find('h3').text == 'Titles':
                         film_results = category.find_all('td', class_='result_text')
                         for result in film_results:
-                            _, title, year = StringLocator.film_identity( result.text.strip().split(' aka ')[0])
+                            _, title, year = FilmParser.identify( result.text.strip().split(' aka ')[0])
                             film_id = result.find('a')['href'].split("/")[2]
                             r.append( (film_id, title, year))
                 return r
@@ -151,13 +152,3 @@ class StringLocator:
         if re.search("nm\d+", s):
             return re.findall("nm\d+", s)[0]
         return None
-
-    def film_identity( s):
-        film_id, title, year = None, None, None
-        if re.search("tt\d+", s):
-            film_id = re.findall("tt\d+", s)[0]
-        elif re.search("\(\d\d\d\d\)$", s):
-            year, title  = int(s[-5:-1]), s[:-6].strip()
-        else:
-            title = s
-        return film_id, title, year

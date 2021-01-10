@@ -4,6 +4,7 @@ import threading
 from webscrapers import *
 from tqdm import tqdm
 from time import sleep
+from parsers import FilmParser
 
 class FilmCollection():
     ''' A FilmCollection groups together several FilmRecords.
@@ -61,7 +62,7 @@ class FilmCollection():
         if isinstance(item, FilmRecord):
             self.films.add( item)
         else:
-            film_id, title, year = StringLocator.film_identity( item)
+            film_id, title, year = FilmParser.identify( item)
             if not film_id:
                 film_id, _ = Webscraper.IMDB_Search.by_title_and_year( title, year)
             self.films.add( FilmRecord( film_id, metadata_flags=self.default_metadata))
