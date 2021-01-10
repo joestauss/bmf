@@ -23,10 +23,13 @@ class FilmCollection():
     name: str (optional)
         Defaults to 'FilmCollection'.
 
-    Optional Variables
-    ------------------
+    Variables
+    ----------
     images_dir: str
-        The folder name of where images are to be saved to.
+        The folder name of where images are to be saved to.  Not necessary if no image-work is to be done.
+
+    keywords: dict
+        A dict of sets.
 
     Methods
     -------
@@ -40,6 +43,10 @@ class FilmCollection():
         manual_tagline_selection
         download_posters
         images_dir.setter
+
+    Properties
+    ----------
+        imdb_ids
     '''
     def __init__(self, input_list, default_metadata=[FilmRecord.IDENTITY_FLAG], name='FilmCollection', VERBOSE=False):
         self.default_metadata = {flag for flag in default_metadata}
@@ -48,10 +55,11 @@ class FilmCollection():
             self.add_record( input_item)
         self.name=name
         self.VERBOSE=VERBOSE
+        self.keywords={}
 
     def __str__(self):
         r = [ PrintUtil.section_header(self.name)]
-        sorted_films = sorted( self.films, key=lambda m:m.metadata['year'] if 'year' in m.metadata else 0)
+        sorted_films = sorted( self.films, key=lambda m:m.metadata['year'] if 'year' in m.metadata and m.metadata['year'] else 0)
         for item in sorted_films:
             r.append( str(item))
         return "\n".join(r)
@@ -164,6 +172,22 @@ class FilmCollection():
                     target_file_location = os.path.join( self.images_dir, target_filename)
                     Webscraper.image(url, target_file_location)
 
+    @property
+    def film_ids( self):
+        return {film.film_id for film in self.films}
+
     def __add__( self, other, name='MergedTable'):
         '''Use A + B to merge two FilmCollections.  The default name is MergedTable.'''
-        return FilmCollection( self.films | other.films, name=name)
+        merged_collection = FilmCollection( self.films | other.films, name=name)
+        title1 = self.name
+        title2 = other.name
+        if title1 == title2:
+            title1 = title1 + "_1"
+            title2 = title2 + "_2"
+        merged_collection.keywords = {
+            title1 : self.film_ids,
+            title2 : other.film_ids
+        }
+        merged_collection.keywords.update( self.keywords)
+        merged_collection.keywords.update( other.keywords)
+        return merged_collection

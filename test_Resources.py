@@ -16,6 +16,30 @@ class TestCases:
             ('/embedded/link/tt234/j/', ('tt234', None, None)) # this should locate the film_id
         ]
 
+        validated_collection_structures = [ # (input, output film ids, output keywords)
+            ('''
+            tt1
+            tt2
+            tt3
+            ''', {'tt1', 'tt2', 'tt3'}, {} ),
+            (''' tt4; tt5;
+            tt6
+            tt7;''', {'tt4', 'tt5', 'tt6', 'tt7'}, {} ),
+            (''' Category : { tt20; tt21;} ''',
+            {'tt20', 'tt21'}, {'Category' : {'tt20', 'tt21'} }),
+            ('''tt10
+            Category 1 : {tt11; tt12;}
+            tt13
+            Category 2 : {
+            tt14; tt15
+            tt16
+            }
+            tt17
+            ''',
+            {'tt10', 'tt11', 'tt12', 'tt13', 'tt14', 'tt15', 'tt16', 'tt17'},
+            { 'Category 1': {'tt11', 'tt12'}, 'Category 2': {'tt14', 'tt15', 'tt16'}})
+        ]
+
     class TableParser:
         validated_correct = [(
         '''
