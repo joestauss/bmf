@@ -1,5 +1,6 @@
 from locators import StringLocator
 from webscrapers import *
+import json
 import os
 
 class FilmRecord():
@@ -84,6 +85,19 @@ class FilmRecord():
                 spaces = ' ' * (max_width - len(metadata_field) + 2)
                 str_lines.append(f"{metadata_field}:{spaces}{self.metadata[metadata_field]}")
         return "\n".join(str_lines) + "\n"
+
+    def as_json( self):
+        json_dict = self.metadata
+        for key, value in json_dict.items():
+            if isinstance( value, set):
+                json_dict[key] = list( value)
+        json_dict['film_id'] = self.film_id
+        return json_dict
+
+    def from_json( json_dict):
+        filmrecord = FilmRecord(json_dict.pop('film_id'))
+        filmrecord.metadata = json_dict
+        return filmrecord
 
     ''' Data extraction methods must be defined before being used in the data_extraction dictionary definition below. '''
 

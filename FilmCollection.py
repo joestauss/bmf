@@ -5,6 +5,7 @@ from webscrapers import *
 from tqdm import tqdm
 from time import sleep
 from parsers import FilmParser
+import json
 
 class FilmCollection():
     ''' A FilmCollection groups together several FilmRecords.
@@ -191,3 +192,9 @@ class FilmCollection():
         merged_collection.keywords.update( self.keywords)
         merged_collection.keywords.update( other.keywords)
         return merged_collection
+
+    def export_metadata_as_json(self):
+        return json.dumps({'FilmRecords':[film.as_json() for film in self.films]}, indent=2)
+
+    def initialize_from_json(json_string, name='Collection Loaded from JSON'):
+        return FilmCollection([FilmRecord.from_json( filmrecord_dict) for filmrecord_dict in json.loads( json_string)['FilmRecords']], name=name)

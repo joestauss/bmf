@@ -4,7 +4,7 @@ from utility_methods import ExportUtil
 class FilmParser():
     YEAR_PAREN     = pp.Suppress("(") + pp.Word(pp.nums).setParseAction( lambda x: int(x[0]) ).setResultsName('year') + pp.Suppress(")")
     TITLE          = pp.OneOrMore( pp.Word( pp.alphanums, pp.alphanums+'.:')).setParseAction(lambda x: ' '.join(x)).setResultsName("title")
-    TITLE_AND_YEAR = TITLE + pp.Optional(YEAR_PAREN)
+    TITLE_AND_YEAR = TITLE + YEAR_PAREN
     IMDB_FILM_ID   = pp.Regex("tt\d+")
 
     END_ENTRY            = pp.Suppress(pp.Literal(";") | pp.StringEnd() | pp.LineEnd())
@@ -71,7 +71,7 @@ class FilmParser():
         A tuple of (IMDB Film ID, title, year).
         If any of these are not in "s", None will be in its place.
         '''
-
+        s = s.replace(u'\xa0', ' ')
         film_id = FilmParser.IMDB_FILM_ID.searchString(s)
         if film_id:
             return (film_id[0][0], None, None)

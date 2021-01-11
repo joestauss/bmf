@@ -1,29 +1,20 @@
 from utility_methods import ExportUtil
 from FilmCollection import *
+import json
 
-class JSONExport:
-    class BaseJSONExport():
-        def __init__(self, film_collection):
-            self.films = film_collection.films
-            self.json = []
-            for film in films.self:
-                self.json.append( "\n".join(["{", json_internals_for_film_data( film), "}"]))
+class FilmCollectionStructureExport():
+    def __init__(self, film_collection):
+        self.film_ids = film_collection.film_ids
+        self.keywords = film_collection.keywords
 
-        def json_internals_for_film_data( self, film):
-            #   By "JSON Internals", I mean everything except the leading and trailing {} brackets.
-            #   By NOT adding these in this method, the child class' implementation can call their supers' version
-            #   and then append any new data without having to worry about re-opening the record .
-            json_lines = [ f'"film_id": "{film.film_id}"']
-            if 'title' in film.metadata:
-                title = film.metadata['title']
-                json_lines.append( f'"title": "{title}"')
-            if 'year' in film.metadata:
-                year = film.metadata['year']
-                json_lines.append( f'"year": "{year}"')
-            return ",\n".join( json_lines)
-
-        def __str__(self):
-            return "\n".join( self.json)
+    def __str__(self):
+        lines = list(self.film_ids)
+        for keyword in keywords:
+            lines.append( keyword + " : {")
+            for film_id in self.keywords[ keyword]:
+                lines.append( f"       {film_id}")
+            lines.append( "}")
+        return "\n".join(lines)
 
 class SQLExport:
     class BaseSQLExport():
