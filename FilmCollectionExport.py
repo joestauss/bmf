@@ -2,20 +2,6 @@ from utility_methods import ExportUtil
 from FilmCollection import *
 import json
 
-class FilmCollectionStructureExport():
-    def __init__(self, film_collection):
-        self.film_ids = film_collection.film_ids
-        self.keywords = film_collection.keywords
-
-    def __str__(self):
-        lines = list(self.film_ids)
-        for keyword in keywords:
-            lines.append( keyword + " : {")
-            for film_id in self.keywords[ keyword]:
-                lines.append( f"       {film_id}")
-            lines.append( "}")
-        return "\n".join(lines)
-
 class SQLExport:
     class BaseSQLExport():
         def __init__(self, film_collection):

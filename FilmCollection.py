@@ -198,3 +198,12 @@ class FilmCollection():
 
     def initialize_from_json(json_string, name='Collection Loaded from JSON'):
         return FilmCollection([FilmRecord.from_json( filmrecord_dict) for filmrecord_dict in json.loads( json_string)['FilmRecords']], name=name)
+
+    def export_film_structure(self):
+        lines = list(self.film_ids)
+        for keyword in self.keywords:
+            lines.append( keyword + " : {")
+            for film_id in self.keywords[ keyword]:
+                lines.append( f"       {film_id}")
+            lines.append( "}")
+        return "\n".join(lines)

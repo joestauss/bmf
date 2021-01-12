@@ -94,29 +94,3 @@ class ExtractData:
                         rec_count[ rec] = 0
                     rec_count[ rec] = rec_count[ rec] + 1
             return {rec for rec in rec_count if rec_count[ rec] > 1}
-
-
-class TwitterArtBot:
-    def __init__( self, username, password):
-        self.username = username
-        self.password = password
-        self.base_url = "https://twitter.com/"
-
-    def text_post( self, post_text):
-        with SeleniumContext.BasicChromeDriver( self.base_url) as self.driver:
-            self._login()
-            self._form_text_post( post_text)
-            time.sleep(10)
-                # I'm not ready to start posting yet.
-
-    def _form_text_post(self, post_text):
-        post_text_box = WebDriverWait(self.driver, 2).until( EC.presence_of_element_located(SeleniumLocator.Twitter.POST_TEXT_BOX))
-        post_text_box.send_keys( post_text)
-
-    def _login( self):
-        username_box = WebDriverWait(self.driver, 2).until( EC.presence_of_element_located(SeleniumLocator.Twitter.USERNAME_BOX))
-        username_box.send_keys( self.username)
-        password_box = WebDriverWait(self.driver, 2).until( EC.presence_of_element_located(SeleniumLocator.Twitter.PASSWORD_BOX))
-        password_box.send_keys( self.password)
-        login_button = WebDriverWait(self.driver, 2).until( EC.presence_of_element_located(SeleniumLocator.Twitter.LOGIN_BUTTON))
-        login_button.click()
