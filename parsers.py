@@ -3,12 +3,12 @@ from utility_methods import ExportUtil
 
 class FilmParser():
     YEAR_PAREN     = pp.Suppress("(") + pp.Word(pp.nums).setParseAction( lambda x: int(x[0]) ).setResultsName('year') + pp.Suppress(")")
-    TITLE          = pp.OneOrMore( pp.Word( pp.alphanums, pp.alphanums+'.:')).setParseAction(lambda x: ' '.join(x)).setResultsName("title")
-    TITLE_AND_YEAR = TITLE + YEAR_PAREN
+    TITLE          = pp.OneOrMore( pp.Word(pp.printables, excludeChars='()')).setParseAction(lambda x: ' '.join(x)).setResultsName("title")
+    TITLE_AND_YEAR = pp.Group(TITLE + YEAR_PAREN).setResultsName('Title and Year Pairs', listAllMatches=True)
     IMDB_FILM_ID   = pp.Regex("tt\d+")
 
     END_ENTRY            = pp.Suppress(pp.Literal(";") | pp.StringEnd() | pp.LineEnd())
-    FILM_ENTRY           = IMDB_FILM_ID + END_ENTRY
+    FILM_ENTRY           = (IMDB_FILM_ID | TITLE_AND_YEAR) + END_ENTRY
     GROUP_ENTRY          = (pp.OneOrMore( pp.Word( pp.alphanums)).setParseAction(lambda x: ' '.join(x)) + pp.Suppress(":") + pp.Suppress("{") + pp.ZeroOrMore( FILM_ENTRY) + pp.Suppress("}") + END_ENTRY).setParseAction(lambda x: [x])
     COLLECTION_STRUCTURE = pp.OneOrMore( FILM_ENTRY | GROUP_ENTRY)
 
@@ -38,21 +38,14 @@ class FilmParser():
         )
         '''
         parse_results = FilmParser.COLLECTION_STRUCTURE.parseString( structure_string)
-        film_ids = set()
+        films = set()
         groups = {}
+        for title, year in parse_results['Title and Year Pairs']:
+            films.add( f"{title} ({year})")
         for entry in parse_results:
-            if isinstance(entry, str):
-                film_ids.add( entry)
-            else:
-                keyword = entry[0]
-                groups[ keyword] = set(entry[1:])
-                film_ids = film_ids | groups[ keyword]
-
-        return film_ids, groups
-
-
-
-
+            if FilmParser.IMDB_FILM_ID.searchString( entry):
+                films.add( entry)
+        return films, groups
 
     def identify( s):
         ''' Identify is the swiss army knife of identifing films.
@@ -76,9 +69,9 @@ class FilmParser():
         if film_id:
             return (film_id[0][0], None, None)
         result = FilmParser.TITLE_AND_YEAR.parseString(s)
-        if not result.year:
-            return (None, result.title, None)
-        return ( None, result.title, result.year)
+        if len(result[0]) == 1:
+            return (None, result[0][0], None)
+        return ( None, result[0][0], result[0][1])
 
 class TableParser():
     ''' Interprets markdown-style tables, with the first row as a header:

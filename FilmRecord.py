@@ -54,6 +54,7 @@ class FilmRecord():
         self.metadata_flags = {metadata for metadata in metadata_flags}
         self.metadata = {}
         self.poster_urls = None
+        self.images = set()
 
     def __eq__(self, other):
         return self.film_id == other.film_id
@@ -139,3 +140,16 @@ class FilmRecord():
         DETAILED_FLAG: load_details,
         POSTERS_FLAG : load_poster_urls
     }
+
+    def as_json_for_twitter( self):
+        def camel_case(string):
+            string = re.sub(r"[\.,!_-]+", " ", string).title().replace(" ", "")
+            return string[0].upper() + string[1:]
+
+        data_dictionary = {}
+        data_dictionary['Subject'] = f"{self.metadata['title']} ({self.metadata['year']})"
+        data_dictionary['Content'] = self.metadata['taglines']
+        data_dictionary['Hashtags'] = [camel_case( self.metadata['title'])]
+        data_dictionary['Images'] = sorted(list( self.images))
+
+        return json.dumps( data_dictionary)

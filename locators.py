@@ -110,9 +110,12 @@ class SoupLocator:
                     if category.find('h3').text == 'Titles':
                         film_results = category.find_all('td', class_='result_text')
                         for result in film_results:
-                            _, title, year = FilmParser.identify( result.text.strip().split(' aka ')[0])
-                            film_id = result.find('a')['href'].split("/")[2]
-                            r.append( (film_id, title, year))
+                            try:
+                                _, title, year = FilmParser.identify( result.text.strip().split(' aka ')[0])
+                                film_id = result.find('a')['href'].split("/")[2]
+                                r.append( (film_id, title, year))
+                            except:
+                                pass
                 return r
 
             def person( soup):

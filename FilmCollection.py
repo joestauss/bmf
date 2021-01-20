@@ -163,15 +163,16 @@ class FilmCollection():
 
     def download_posters(self):
         '''Downloads all movie posters to NewPosterFolder.'''
-        self.images_dir = "NewPosterFolder"
         for film in self.films:
             i = 0
             if FilmRecord.POSTERS_FLAG in film.metadata_flags:
-                for url in film.poster_urls:
-                    i = i + 1
-                    target_filename = f'{film.film_id} Poster {i}.jpg'
-                    target_file_location = os.path.join( self.images_dir, target_filename)
-                    Webscraper.image(url, target_file_location)
+                for url in tqdm(film.poster_urls):
+                    if url != 'https://m.media-amazon.com/images/M/MV5BZGI5OTZhYjAtMGYwMS00ZmFiLWI3ODAtYjk1OWRiNWExNWNiXkEyXkFqcGdeQXVyNzI4MDMyMTU@._V1_.jpg':
+                        i = i + 1
+                        target_filename = f"{film.metadata['title']} ({film.metadata['year']}), Poster {i}.jpg"
+                        target_file_location = os.path.join( self.images_dir, target_filename)
+                        Webscraper.image(url, target_file_location)
+                        film.images.add( target_filename)
 
     @property
     def film_ids( self):
@@ -207,3 +208,14 @@ class FilmCollection():
                 lines.append( f"       {film_id}")
             lines.append( "}")
         return "\n".join(lines)
+
+    def flag_all(self, flag):
+        for film in self.films:
+            film.metadata_flags.add( flag)
+
+
+    def as_json_for_twitter( self):
+        data_dictionary = { 'ContentRecords': []}
+        for film in self.films:
+            data_dictionary['ContentRecords'].append( json.loads( film.as_json_for_twitter()))
+        return json.dumps( data_dictionary, indent=2)
