@@ -6,6 +6,7 @@ from tqdm import tqdm
 from time import sleep
 from parsers import FilmParser
 import json
+from scheduler import PatientThreadManager
 
 class FilmCollection():
     ''' A FilmCollection groups together several FilmRecords.
@@ -49,13 +50,12 @@ class FilmCollection():
     ----------
         imdb_ids
     '''
-    def __init__(self, input_list, default_metadata=[FilmRecord.IDENTITY_FLAG], name='FilmCollection', VERBOSE=False):
+    def __init__(self, input_list, default_metadata=[FilmRecord.IDENTITY_FLAG], name='FilmCollection'):
         self.default_metadata = {flag for flag in default_metadata}
         self.films = set()
         for i, input_item in enumerate(input_list, 1):
             self.add_record( input_item)
         self.name=name
-        self.VERBOSE=VERBOSE
         self.keywords={}
 
     def __str__(self):
@@ -76,27 +76,27 @@ class FilmCollection():
                 film_id, _ = Webscraper.IMDB_Search.by_title_and_year( title, year)
             self.films.add( FilmRecord( film_id, metadata_flags=self.default_metadata))
 
-    def load_all_metadata( self):
+    def load_all_metadata( self, VERBOSE=False):
         '''Creates a thread for each film that loads its metadata.  Waits 0.1 seconds after starting each new thread.
 
         If VERBOSE, there will be TQDM progess bars for creating and waiting for threads.
         '''
-        threads = {}
-        films = self.films
-        if self.VERBOSE:
-            films = tqdm( films)
-        for film in films:
-            if self.VERBOSE:
-                films.set_description(f"Starting thread for {film.film_id}")
-            threads[film] = threading.Thread( target=film.load_metadata)
-            threads[film].start()
-            sleep(0.1)
-        if self.VERBOSE:
-            films = tqdm( films)
-        for film in films:
-            if self.VERBOSE:
-                films.set_description(f"Waiting for {film.film_id}")
-            threads[film].join()
+        PatientThreadManager([threading.Thread( target=film.load_metadata) for film in self.films])(VERBOSE=VEBOSE)
+        # films = self.films
+        # if self.VERBOSE:
+        #     films = tqdm( films)
+        # for film in films:
+        #     if self.VERBOSE:
+        #         films.set_description(f"Starting thread for {film.film_id}")
+        #     threads[film] = threading.Thread( target=film.load_metadata)
+        #     threads[film].start()
+        #     sleep(0.1)
+        # if self.VERBOSE:
+        #     films = tqdm( films)
+        # for film in films:
+        #     if self.VERBOSE:
+        #         films.set_description(f"Waiting for {film.film_id}")
+        #     threads[film].join()
 
     def full_recommendation_expansion(self):
         '''Adds to the collection all films that were recommended on other films' IMDB page.'''
@@ -212,7 +212,6 @@ class FilmCollection():
     def flag_all(self, flag):
         for film in self.films:
             film.metadata_flags.add( flag)
-
 
     def as_json_for_twitter( self):
         data_dictionary = { 'ContentRecords': []}

@@ -22,22 +22,22 @@ class Webscraper:
         with SoupContext.Base(url) as soup:
             urllib.request.urlretrieve(url, target_file_location)
 
-    class IMDB_Film:
-        def title_and_year( film_id):
+    class IMDB_Film: # Partially unit-tested
+        def title_and_year( film_id): # tested
             with IMDbContext.Film(film_id) as film:
                 return film.title_and_year()
 
         def main_page( film_id):
             with IMDbContext.Film(film_id) as film:
                 dd = {}
-                dd.update( film.title_and_year( ) )
-                dd.update( film.small_credits( ) )
+                dd.update( film.title_and_year() )
+                dd.update( film.small_credits() )
                 dd.update( film.details() )
-                dd.update( {'genres' : film.genres(soup) })
+                dd.update( {'genres' : film.genres() }) # tested
                 return dd
 
-        def taglines( film_id):
-            with IMDbContext.FilmTaglines(film_id) as filmtaglines:
+        def taglines( film_id): #tested
+            with IMDbContext.FilmTaglines(film_id) as film:
                 return film.taglines()
 
         def two_taglines_at_random(film_id):
@@ -50,7 +50,7 @@ class Webscraper:
                 else:
                     return taglines[:NUM_TAGLINES]
 
-        def production_companies( film_id):
+        def production_companies( film_id): #tested
             with IMDbContext.FilmCompanyCredits( film_id) as film:
                 return film.production_cos()
 
@@ -64,7 +64,7 @@ class Webscraper:
                         return_vals.append([img['src'] for img in soup.find_all('img') if 'peek' not in img['class']][0])
                 return return_vals
 
-    class IMDB_Person:
+    class IMDB_Person:  #  fully unit-tested
         def full_name( person_id):
             '''Accepts an IMDB person_id; returns the person's name.'''
             with IMDbContext.Person( person_id) as person:
@@ -75,7 +75,7 @@ class Webscraper:
             with IMDbContext.Person( person_id) as person:
                 return person.acting_filmography()
 
-    class IMDB_Search:
+    class IMDB_Search:  #  fully unit-tested
         def by_person_name( person_name):
             '''Accepts a person's name, searches IMDB for it, and returns the top result.'''
             with IMDbContext.Search( person_name) as search:

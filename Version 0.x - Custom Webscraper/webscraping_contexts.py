@@ -83,14 +83,14 @@ class IMDbContext:
             super().__init__(film_id)
             self.url = self.url + "/companycredits"
 
-            def production_cos( self):
-                production_cos = set()
-                credits = self.soup.find(id='company_credits_content')
-                prod_co_list = credits.find_all(class_='simpleList')[0]
-                for prod_co in prod_co_list.find_all('li'):
-                    prod_co_text = prod_co.a.text.strip()
-                    production_cos.add(prod_co_text)
-                return production_cos
+        def production_cos( self):
+            production_cos = set()
+            credits = self.soup.find(id='company_credits_content')
+            prod_co_list = credits.find_all(class_='simpleList')[0]
+            for prod_co in prod_co_list.find_all('li'):
+                prod_co_text = prod_co.a.text.strip()
+                production_cos.add(prod_co_text)
+            return production_cos
 
     class FilmImages( Film):
         def poster_relative_locations( self):

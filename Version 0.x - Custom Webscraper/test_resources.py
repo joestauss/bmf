@@ -1,10 +1,5 @@
 from utility import SQLTable
 
-class PersonID:
-    vincent_price = 'nm0001637'
-    bruce_willis  = 'nm0000246'
-    renee_zellweger = 'nm0000250'
-
 class TestCases:
     class FilmParser:
         validated_identities = [
