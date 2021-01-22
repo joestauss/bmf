@@ -59,7 +59,7 @@ class FilmCollection():
         self.keywords={}
 
     def __str__(self):
-        r = [ PrintUtil.section_header(self.name)]
+        r = [ utility.boxed_text(self.name)]
         sorted_films = sorted( self.films, key=lambda m:m.metadata['year'] if 'year' in m.metadata and m.metadata['year'] else 0)
         for item in sorted_films:
             r.append( str(item))
@@ -144,7 +144,7 @@ class FilmCollection():
 
         for film in self.films:
             if FilmRecord.TAGLINES_FLAG in film.metadata_flags:
-                print(PrintUtil.section_header(str(film).split('\n')))
+                print(utility.boxed_text(str(film).split('\n')))
                 all_taglines = Webscraper.IMDB_Film.taglines( film.film_id)
                 film.metadata['taglines']  = get_user_choices( list(all_taglines))
 

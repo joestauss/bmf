@@ -1,5 +1,4 @@
-from locators import SoupLocator
-from webscraping_context_managers import *
+from webscraping_contexts import *
 import urllib.request
 import re
 import random
@@ -25,26 +24,26 @@ class Webscraper:
 
     class IMDB_Film:
         def title_and_year( film_id):
-            with SoupContext.Film(film_id) as soup:
-                return SoupLocator.IMDB.MainPage.title_and_year( soup)
+            with IMDbContext.Film(film_id) as film:
+                return film.title_and_year()
 
         def main_page( film_id):
-            with SoupContext.Film(film_id) as soup:
+            with IMDbContext.Film(film_id) as film:
                 dd = {}
-                dd.update( SoupLocator.IMDB.MainPage.title_and_year( soup) )
-                dd.update( SoupLocator.IMDB.MainPage.small_credits( soup) )
-                dd.update( SoupLocator.IMDB.MainPage.details(soup) )
-                dd.update( {'genres' : SoupLocator.IMDB.MainPage.genres(soup) })
+                dd.update( film.title_and_year( ) )
+                dd.update( film.small_credits( ) )
+                dd.update( film.details() )
+                dd.update( {'genres' : film.genres(soup) })
                 return dd
 
         def taglines( film_id):
-            with SoupContext.Taglines(film_id) as soup:
-                return SoupLocator.IMDB.taglines( soup)
+            with IMDbContext.FilmTaglines(film_id) as filmtaglines:
+                return film.taglines()
 
         def two_taglines_at_random(film_id):
-            with SoupContext.Taglines(film_id) as soup:
+            with IMDbContext.FilmTaglines(film_id) as film:
                 NUM_TAGLINES = 2
-                taglines = list(SoupLocator.IMDB.taglines( soup))
+                taglines = list(film.taglines())
                 random.shuffle( taglines)
                 if len( taglines) < NUM_TAGLINES:
                     return taglines
@@ -52,13 +51,13 @@ class Webscraper:
                     return taglines[:NUM_TAGLINES]
 
         def production_companies( film_id):
-            with SoupContext.CompanyCredits( film_id) as soup:
-                return SoupLocator.IMDB.CompanyCredits.production_cos( soup)
+            with IMDbContext.FilmCompanyCredits( film_id) as film:
+                return film.production_cos()
 
         def poster_urls( film_id):
-            with SoupContext.Posters( film_id) as soup:
+            with IMDbContext.FilmPosters( film_id) as soup:
                 base_url = f'https://www.imdb.com'
-                viewer_urls = [base_url + rel for rel in SoupLocator.IMDB.Images.poster_relative_locations( soup)]
+                viewer_urls = [base_url + rel for rel in IMDbContext.FilmImages.poster_relative_locations( soup)]
                 return_vals = []
                 for viewer_url in viewer_urls:
                     with SoupContext.Base(viewer_url) as soup:
@@ -68,24 +67,24 @@ class Webscraper:
     class IMDB_Person:
         def full_name( person_id):
             '''Accepts an IMDB person_id; returns the person's name.'''
-            with SoupContext.Person( person_id) as soup:
-                return SoupLocator.IMDB.Person.full_name( soup)
+            with IMDbContext.Person( person_id) as person:
+                return person.full_name()
 
         def acting_filmography( person_id):
             '''Accepts an IMDB person_id; returns a set consisting of their acting filmography.  Voice-over work, uncredited roles, etc. are not included.'''
-            with SoupContext.Person( person_id) as soup:
-                return SoupLocator.IMDB.Person.acting_filmography( soup)
+            with IMDbContext.Person( person_id) as person:
+                return person.acting_filmography()
 
     class IMDB_Search:
         def by_person_name( person_name):
             '''Accepts a person's name, searches IMDB for it, and returns the top result.'''
-            with SoupContext.Search( person_name) as soup:
-                return SoupLocator.IMDB.Search.person( soup)
+            with IMDbContext.Search( person_name) as search:
+                return search.first_person()
 
         def by_title_and_year( search_title, search_year):
             '''Searches IMDB for search_title, and selects the film released closest to search_year.  If search_year is None, returns the top result.'''
-            with SoupContext.Search( search_title) as soup:
-                all_search_results = SoupLocator.IMDB.Search.films( soup)
+            with IMDbContext.Search( search_title) as search:
+                all_search_results = search.films()
                 if not all_search_results:
                     return None
                 candidates = [(id, year) for (id, title, year) in all_search_results if title == search_title]

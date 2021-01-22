@@ -4,8 +4,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from locators import SeleniumLocator
 from threading import Thread
-from utility_methods import *
 from webscrapers import *
+from chopping_block import SeleniumDriver
+from selenium.webdriver.common.by import By
 import time
 
 def BatchExtraction( dataExtractionThread, inputs):
@@ -65,7 +66,7 @@ class IMDBExtractionThread:
             url = f"https://www.imdb.com/title/{film_id}/"
             recs = []
             with SeleniumContext.BasicChromeDriver( url) as driver:
-                recs_temp = WebDriverWait(driver, 1).until( EC.presence_of_element_located(SeleniumLocator.IMDB.RECS_LIST))
+                recs_temp = WebDriverWait(driver, 1).until( EC.presence_of_element_located(By.ID, "titleRecs"))
                 recs = recs_temp.find_elements(By.CLASS_NAME, 'rec_item')
                 for rec in recs:
                     if isinstance( rec, str):

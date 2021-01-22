@@ -19,7 +19,7 @@ This method also contains the TwitterArtBot class.  The functionality is still p
 
 # Exporting Data
 
-Exporting is handled in __FilmCollectionExport.py__.  The module contains a base class and several sub-classes that specify the format and level of detail for the data export.  Each of the classes takes a FilmCollection object as an initialization parameter.  Currently, the only export-format is SQL, although JSON will be added soon.  Most data-normalization methods are found in the ExportUtil.Table() class (see "Utility Methods").
+Exporting is handled in __FilmCollectionExport.py__.  The module contains a base class and several sub-classes that specify the format and level of detail for the data export.  Each of the classes takes a FilmCollection object as an initialization parameter.  Currently, the only export-format is SQL, although JSON will be added soon.  Most data-normalization methods are found in the SQLTable() class (see "Utility Methods").
 
 # Unit testing
 
@@ -27,7 +27,7 @@ Unit tests can be found in the  __test_*.py__ modules, in addition to two auxili
 
 # Utility Methods
 
-Miscellaneous other operations are supported in __utility_methods.py__.  There are currently three classes of methods: _SoupUtil_, _ExportUtil_, and _PrintUtil_.  Previously, there was a _SeleniumUtil_ class as well, but its functionality has been completely taken over by webscraping_context_mangers.py, which is the eventual goal for this entire module; I would prefer if all of these methods were in other, more-purposeful modules, but at this stage in development I am okay with having an "other" module like this.
+Miscellaneous other operations are supported in __utility_methods.py__.  There are currently three classes of methods: _SoupUtil_, _SQLTable_, and _PrintUtil_.  Previously, there was a _SeleniumUtil_ class as well, but its functionality has been completely taken over by webscraping_context_mangers.py, which is the eventual goal for this entire module; I would prefer if all of these methods were in other, more-purposeful modules, but at this stage in development I am okay with having an "other" module like this.
 
 # Future Work
 

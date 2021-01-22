@@ -1,4 +1,3 @@
-from locators import StringLocator
 from webscrapers import *
 import json
 import os
