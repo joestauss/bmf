@@ -15,3 +15,5 @@
 * __All JSON, no SQL.__  Although I may want to use SQLite if I ever make this an App, for now everything will be JSON-based.
 
 * __Key design patterns.__  Keep an eye out for opportunities to use context managers, generators, and decorators.
+
+# Key Design Patterns

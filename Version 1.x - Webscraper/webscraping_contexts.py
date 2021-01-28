@@ -2,11 +2,15 @@ import re
 import requests
 import pyparsing as pp
 from bs4 import BeautifulSoup
-from parsers import FilmParser
-from chopping_block import SoupUtil
+from chopping_block import SoupUtil, FilmParser
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
 class IMDbContext:
-    class Base():
+    class BaseSoup():
         NAME_ID  = pp.Combine( pp.Literal("nm") + pp.Word( pp.nums))
         TITLE_ID = pp.Combine( pp.Literal("tt") + pp.Word( pp.nums))
 
@@ -24,7 +28,35 @@ class IMDbContext:
         def __exit__(self, exc_type, exc_value, exc_traceback):
             pass
 
-    class Film( Base):
+    class BaseSelenium():
+        def __init__( self, url):
+            self.url = url
+
+        def __enter__(self):
+            self.driver = webdriver.Chrome()
+            self.driver.get(self.url)
+            return self.driver
+
+        def __exit__(self, exc_type, exc_value, exc_traceback):
+            self.driver.quit()
+
+    class Recommendations( BaseSelenium):
+        def __init__( self, film_id):
+            self.url = f"https://www.imdb.com/title/{film_id}/"
+
+        def all_recommendations( driver):
+            recs_temp = WebDriverWait(driver, 1).until( EC.presence_of_element_located(By.ID, "titleRecs"))
+            recs = recs_temp.find_elements(By.CLASS_NAME, 'rec_item')
+            for rec in recs:
+                if isinstance( rec, str):
+                    rec_str = rec
+                else:
+                    rec_str = rec.get_attribute("data-tconst")
+                if rec_str != film_id:
+                    recs.append(rec_str)
+            return recs
+
+    class Film( BaseSoup):
         def __init__(self, film_id):
             self.film_id = film_id
             if not re.match("tt\d+", self.film_id):
@@ -117,7 +149,7 @@ class IMDbContext:
                     taglines.add(tagline_text)
                 return taglines
 
-    class Person( Base):
+    class Person( BaseSoup):
         def __init__(self, person_id):
             self.person_id = person_id
             if not re.match("nm\d+", self.person_id):
@@ -146,7 +178,7 @@ class IMDbContext:
             full_acting_credits = self.soup.find(class_='filmo-category-section').find_all(class_='filmo-row')
             return filmography_filter( full_acting_credits)
 
-    class Search( Base):
+    class Search( BaseSoup):
         def __init__(self, search_term):
             self.url = f"https://www.imdb.com/find?q={search_term}"
 

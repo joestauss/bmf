@@ -64,6 +64,10 @@ class Webscraper:
                         return_vals.append([img['src'] for img in soup.find_all('img') if 'peek' not in img['class']][0])
                 return return_vals
 
+        def recommendations( film_id):
+            with IMDbContext.Recommendations( film_id) as film:
+                return film.all_recommendations()
+
     class IMDB_Person:  #  fully unit-tested
         def full_name( person_id):
             '''Accepts an IMDB person_id; returns the person's name.'''
