@@ -1,0 +1,17 @@
+ACTOR		Vincent Price
+DIRECTOR	Roger Corman
+PRODUCER	Val Lewton
+ACTOR		Boris Karloff
+PROD_CO		Hammer Film Productions
+DIRECTOR	Herschell Gordon Lewis
+DIRECTOR	Lucio Fulci
+DIRECTOR	Mario Bava
+DIRECTOR	George A. Romero
+DIRECTOR	David Cronenberg
+IMDB_LIST	https://www.imdb.com/list/ls000742940/
+Deathdream (1974)
+Fright Night (1985)
+One Dark Night (1982)
+The House of Seven Corpses (1974)
+The House that Dripped Blood (1971)
+The Mephisto Waltz (1971)
