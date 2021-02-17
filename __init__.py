@@ -1,3 +1,3 @@
 import bmb.collections
 #import bmb.deprecated
-#import bmb.extractors
+import bmb.extractors

@@ -1,27 +1,9 @@
-from webscraping_contexts import *
+from my_webscraping_contexts import IMDbContext
 import urllib.request
 import re
 import random
 
-class Webscraper:
-    def image( url, target_file_location):
-        ''' Downloads an image.
-
-        Parameters
-        ----------
-        url: string
-          URL to the image to be downloaded.
-
-        target_file_location: os.path
-            The loation where the file will be written to.  It overwrites whatever is at that location.
-
-        Returns
-        -------
-        Nothing.
-        '''
-        with SoupContext.Base(url) as soup:
-            urllib.request.urlretrieve(url, target_file_location)
-
+class MyWebscraper:
     class IMDB_Film: # Partially unit-tested
         def title_and_year( film_id): # tested
             with IMDbContext.Film(film_id) as film:
