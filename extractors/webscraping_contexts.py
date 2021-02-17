@@ -2,7 +2,8 @@ import re
 import requests
 import pyparsing as pp
 from bs4 import BeautifulSoup
-from chopping_block import SoupUtil, FilmParser
+from filmfwen.extractors import search_in_soup
+from py_util.parsers import extract_film_identity
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -67,7 +68,7 @@ class IMDbContext:
             title_div = self.soup.find('div', class_='title_wrapper')
             if title_div is None:
                 return None, None
-            _, title, year = FilmParser.identify( title_div.h1.text.strip())
+            _, title, year = extract_film_identity( title_div.h1.text.strip())
             return {'title': title, "year": year}
 
         def small_credits( self):
@@ -89,7 +90,7 @@ class IMDbContext:
             dd = {key: None for (key, _) in details}
             for key, search_term in details:
                 try:
-                    data_div = SoupUtil.search_in_soup( details_div, 'div', search_term)
+                    data_div = search_in_soup( details_div, 'div', search_term)
                     if key in ['budget', 'box_office']:
                         dd[ key] = StringLocator.dollar_amount(data_div.text)
                     if key in ['runtime']:
@@ -102,7 +103,7 @@ class IMDbContext:
             genres = set()
             try:
                 storyline_div = self.soup.find('div', id='titleStoryLine')
-                genres_div  = SoupUtil. search_in_soup( storyline_div, 'div', 'Genre')
+                genres_div  = search_in_soup( storyline_div, 'div', 'Genre')
 
                 genre_links = genres_div.find_all('a')
                 for l in genre_links:
@@ -173,7 +174,7 @@ class IMDbContext:
                         if re.search(illegal_pattern, item.text) :
                             REGULAR_FILM = False
                     if REGULAR_FILM:
-                        r_vals.append( FilmParser.identify( item.find('a')["href"])[0])
+                        r_vals.append( extract_film_identity( item.find('a')["href"])[0])
                 return r_vals
             full_acting_credits = self.soup.find(class_='filmo-category-section').find_all(class_='filmo-row')
             return filmography_filter( full_acting_credits)
@@ -190,7 +191,7 @@ class IMDbContext:
                     film_results = category.find_all('td', class_='result_text')
                     for result in film_results:
                         try:
-                            _, title, year = FilmParser.identify( result.text.strip().split(' aka ')[0])
+                            _, title, year = extract_film_identity( result.text.strip().split(' aka ')[0])
                             film_id = result.find('a')['href'].split("/")[2]
                             r.append( (film_id, title, year))
                         except:

@@ -3,7 +3,6 @@ import threading
 from webscrapers import *
 from tqdm import tqdm
 from time import sleep
-from chopping_block import FilmParser
 import json
 from utility import PatientThreadManager, ActionThreadsMixin, boxed_text, select_from_list
 import pyparsing as pp
