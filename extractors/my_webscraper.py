@@ -1,4 +1,4 @@
-from my_webscraping_contexts import IMDbContext
+from .my_webscraping_contexts import IMDbContext
 import urllib.request
 import re
 import random
@@ -82,9 +82,9 @@ class MyWebscraper:
 
         def for_person_name( person_id):
             '''Look up name from IMDB person_id.  Convenience function that calls Webscraper.IMDB_Person.full_name.'''
-            return Webscraper.IMDB_Person.full_name( person_id)
+            return MyWebscraper.IMDB_Person.full_name( person_id)
 
         def for_title_and_year( film_id):
             '''Look up (title, year) from IMDB film_id.  Convenience function that calls Webscraper.IMDB_Film.title_and_year.'''
-            dd = Webscraper.IMDB_Film.title_and_year( film_id)
+            dd = MyWebscraper.IMDB_Film.title_and_year( film_id)
             return dd['title'], dd['year']
