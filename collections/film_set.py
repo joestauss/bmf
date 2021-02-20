@@ -1,4 +1,5 @@
 from py_util.collections import BaseSet
+from bmb.collections     import FilmRecord
 
 class FilmSet( BaseSet):
     def __str__(self):

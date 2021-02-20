@@ -5,12 +5,11 @@ from collections import namedtuple
 class Test_BaseClass_Functionality( unittest.TestCase):
     def setUp( self):
         InitTestCase = namedtuple( 'InitTestCase', [ 'input', 'object'])
-        dicts = [
-            { 'a' : 'A', 'b' : 'B'},
-            { f"key_{i}" : f"value_{i}" for i in range( 10)}
+        self.records = [
+            InitTestCase( ('Dr. Zhivago', 1965), FilmRecord( 'Dr. Zhivago', 1965)),
+            InitTestCase( ('Caddyshack' , 1980), FilmRecord( 'Caddyshack' , 1980))
         ]
 
-        self.records = [ InitTestCase(dict, FilmRecord( dict)) for dict in dicts]
         self.sets = [
             InitTestCase( {self.records[0].object},         FilmSet( {self.records[0].object})),
             InitTestCase( {self.records[1].object},         FilmSet( {self.records[1].object})),
@@ -19,7 +18,7 @@ class Test_BaseClass_Functionality( unittest.TestCase):
 
     def test_BaseMapping_through_FilmRecord( self):
         for test_case in self.records:
-            self.assertEqual( test_case.object, FilmRecord( test_case.input))
+            self.assertEqual( test_case.object, FilmRecord( *test_case.input))
             self.assertEqual( test_case.object, eval( repr( test_case.object)))
 
     def test_BaseSet_through_FilmSet( self):

@@ -2,13 +2,15 @@ from py_util.collections import BaseMapping, JSONableMapping
 from py_util.parsers     import extract_film_identity
 
 class FilmRecord( BaseMapping, JSONableMapping):
+    def __init__(self, film_title, release_year):
+        data_dictionary = { 'title' : film_title, 'year' : release_year}
+        super().__init__( data_dictionary)
+
     def __str__( self):
-        if 'title' in self and 'year' in self:
-            return f"{self[ 'title']} ({ self[ 'year']})"
-        elif 'title' in self:
-            return self['title']
-        else:
-            return "FilmRecord"
+        return f"{self['title']} ({self['year']})"
+
+    def __repr__( self):
+        return f'{type(self).__name__}({self["title"]!r}, {self["year"]!r})'
 
     @classmethod
     def from_id_string( cls, id_string):

@@ -3,11 +3,6 @@ import requests
 import pyparsing as pp
 from bs4 import BeautifulSoup
 from py_util.parsers import extract_film_identity
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
 
 def search_in_soup(soup, tag_type, search_text):
     candidates = soup.find_all(tag_type)
