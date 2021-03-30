@@ -1,5 +1,3 @@
-# B-Movie Finder
+# This repository is being overhauled.
 
-# This codebase is undergoing a major rewrite.
-
-The first working iteration of this project was based on a custom webscraper, which is being replaced with one of the open-source APIs for either IMDb or TMDb, and in the process I am re-writing most of this code.  The old version (Version 1.x) is slowly being improved, documented, and archived as I work on my requirements for the upgrade (Version 2.x).
+I have used the code in this repository to help me with two projects, but the purpose of the codebase has become a little muddled by some of the additional functionality I have added in.  I am in the process of changing the data model for this project and using the opportunity to pin down the scope of this project more exactly.
