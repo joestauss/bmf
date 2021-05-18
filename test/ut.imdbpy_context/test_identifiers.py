@@ -1,5 +1,5 @@
 import unittest
-from bmb.extractors import IMDbPY_Context
+from ffwen.extractors import IMDbPY_Context
 from collections import namedtuple
 
 class Test_Identifiers( unittest.TestCase):

@@ -1,5 +1,5 @@
 import unittest
-from bmb.collections import FilmRecord, FilmSet
+from ffwen.collections import FilmRecord, FilmSet
 from collections import namedtuple
 
 class Test_BaseClass_Functionality( unittest.TestCase):

@@ -1,4 +1,4 @@
-from bmb.extractors import MyWebscraper
+from ffwen.extractors import MyWebscraper
 import unittest
 
 class Test_MyWebscraper_Search( unittest.TestCase):

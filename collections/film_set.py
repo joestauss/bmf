@@ -1,5 +1,5 @@
 from py_util.collections import BaseSet
-from bmb.collections     import FilmRecord
+from ffwen.collections   import FilmRecord
 
 class FilmSet( BaseSet):
     def __str__(self):
